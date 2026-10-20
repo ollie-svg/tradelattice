@@ -1,6 +1,6 @@
 PY ?= python
 
-.PHONY: test serve load-samples validate lint
+.PHONY: test serve load-samples validate lint docs docs-serve
 
 test:
 	$(PY) -m pytest
@@ -19,3 +19,9 @@ load-samples:
 
 serve:
 	$(PY) -m uvicorn api.main:app --reload --port 8000
+
+docs:
+	mkdocs build --strict
+
+docs-serve:
+	mkdocs serve

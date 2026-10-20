@@ -22,4 +22,8 @@ Validate the spec examples: `python -m spec.validate spec/examples/*.json`
 - Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) and [GOVERNANCE.md](GOVERNANCE.md)
 
+## Website
+
+The docs site is built with MkDocs Material and deployed on Cloudflare Pages at <https://tradelattice.ca>. Install with `pip install -e .[docs]`, then run `make docs-serve` to preview or `make docs` for a strict build. See [docs/deploy.md](docs/deploy.md).
+
 Licensed under Apache-2.0.

@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
+docs = ["mkdocs<2", "mkdocs-material"]
 
 [tool.setuptools]
 packages = ["spec", "connectors", "api"]

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  {% set og_title = page.title ~ " - " ~ config.site_name if page and page.title and not page.is_homepage else config.site_name %}
+  {% set og_desc = page.meta.description if page and page.meta and page.meta.description else "The open data standard for goods, tariffs, tenders and shipments. Canada first, country-agnostic by design." %}
+  <meta property="og:title" content="{{ og_title }}">
+  <meta property="og:description" content="{{ og_desc }}">
+  <meta property="og:url" content="{{ page.canonical_url if page else config.site_url }}">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ og_title }}">
+  <meta name="twitter:description" content="{{ og_desc }}">
+  <script defer data-domain="tradelattice.ca" src="https://plausible.io/js/script.js"></script>
+{% endblock %}

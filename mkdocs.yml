@@ -1,0 +1,56 @@
+site_name: TradeLattice
+site_url: https://tradelattice.ca
+# Placeholder: replace with the real repository URL before launch.
+repo_url: https://github.com/REPLACE-ME/tradelattice
+copyright: "© 2026 TradeLattice Contributors · Apache-2.0 · Powered by <a href='https://browes.ai'>Browes AI</a>"
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue grey
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+    - search
+
+extra:
+  generator: false
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Spec: spec.md
+  - Connectors: connectors.md
+  - API: api.md
+  - Architecture: ARCHITECTURE.md
+  - Roadmap: ROADMAP.md
+  - ADRs:
+      - adr/0001-schema-first.md
+      - adr/0002-sqlite-default.md
+      - adr/0003-connectors-offline-first.md
+  - Contributing:
+      - Contributing: contributing.md
+      - Deploying the site: deploy.md
+  - Privacy: privacy.md
+  - Terms: terms.md

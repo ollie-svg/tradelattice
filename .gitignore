@@ -11,3 +11,4 @@ dist/
 records.jsonl
 .env
 .DS_Store
+site/
