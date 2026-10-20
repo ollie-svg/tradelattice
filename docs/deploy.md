@@ -10,8 +10,9 @@ The domains are registered at GoDaddy. `tradelattice.ca` carries the Google Work
 2. **GoDaddy → tradelattice.ca → Nameservers → Change** to the two Cloudflare nameservers shown. Propagation takes minutes to a few hours; mail keeps flowing because the MX records are already in Cloudflare.
 3. **Workers & Pages → Create → Pages → Connect to Git → `ollie-svg/tradelattice`** with the settings in the table below. First build takes about two minutes.
 4. **Pages project → Custom domains → Add `tradelattice.ca`**. Cloudflare creates the CNAME automatically because the zone is on Cloudflare.
-5. Repeat step 1 for `tradelattice.org` and `tradelattice.net` (no MX needed), move their nameservers at GoDaddy, then add one proxied `A` record `@ → 192.0.2.1` on each so the zone resolves.
-6. **Bulk Redirects → Create list** `tradelattice-aliases` with two entries: `https://tradelattice.org/*` → `https://tradelattice.ca/${1}` and `https://tradelattice.net/*` → `https://tradelattice.ca/${1}`, status 301, preserve query string. Create a rule that enables the list.
+5. **After the site is live:** at GoDaddy, for `tradelattice.org` and `tradelattice.net`, use **DNS → Forwarding → Add** → `https://tradelattice.ca`, permanent (301). Leave their nameservers at GoDaddy; they never join Cloudflare. Paths are not preserved, which is acceptable.
+
+Done so far (Oct 20, 2026): steps 1 and 2 for `tradelattice.ca` (nameservers `adel` and `tony.ns.cloudflare.com`; parking A/CNAME records removed; MX, SPF, DMARC, site-verification kept).
 
 ## Cloudflare Pages settings
 
