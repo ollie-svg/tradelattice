@@ -1,5 +1,5 @@
 ---
-title: TradeLattice
+title: Home
 description: The open data standard for goods, tariffs, tenders and shipments. Canada first, country-agnostic by design.
 ---
 
