@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/price_observation.schema.json",
+  "title": "PriceObservation",
+  "allOf": [
+    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "price_observation"},
+        "attributes": {
+          "type": "object",
+          "required": ["subject", "price", "observed_at", "location", "source_url"],
+          "additionalProperties": false,
+          "properties": {
+            "subject": {
+              "type": "object",
+              "required": ["type", "description"],
+              "additionalProperties": false,
+              "properties": {
+                "type": {"enum": ["product", "service"]},
+                "hs_code": {"type": "string", "pattern": "^[0-9]{6,10}$"},
+                "unspsc": {"type": "string"},
+                "description": {"type": "string", "minLength": 1}
+              }
+            },
+            "price": {
+              "type": "object",
+              "required": ["amount", "currency", "per_unit"],
+              "additionalProperties": false,
+              "properties": {
+                "amount": {"type": "number", "minimum": 0},
+                "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+                "per_unit": {"type": "string", "minLength": 1}
+              }
+            },
+            "observed_at": {"type": "string", "format": "date-time"},
+            "location": {
+              "type": "object",
+              "required": ["country"],
+              "additionalProperties": false,
+              "properties": {
+                "country": {"type": "string", "pattern": "^[A-Z]{2}$"},
+                "region": {"type": "string"},
+                "city": {"type": "string"}
+              }
+            },
+            "source_url": {"type": "string", "format": "uri"}
+          }
+        }
+      }
+    }
+  ]
+}

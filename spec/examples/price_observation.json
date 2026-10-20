@@ -1,0 +1,14 @@
+{
+  "id": "statcan_trade:2026-01-CA-100190",
+  "type": "price_observation",
+  "source": "statcan_trade",
+  "observed_at": "2026-03-10T00:00:00Z",
+  "jurisdiction": "CA",
+  "attributes": {
+    "subject": {"type": "product", "hs_code": "100190", "description": "Wheat and meslin, other than durum"},
+    "price": {"amount": 312.5, "currency": "CAD", "per_unit": "tonne"},
+    "observed_at": "2026-01-31T00:00:00Z",
+    "location": {"country": "CA"},
+    "source_url": "https://www150.statcan.gc.ca/n1/en/type/data"
+  }
+}

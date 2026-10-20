@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/product.schema.json",
+  "title": "Product",
+  "allOf": [
+    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "product"},
+        "attributes": {
+          "type": "object",
+          "required": ["hs_code", "description"],
+          "additionalProperties": false,
+          "properties": {
+            "hs_code": {"type": "string", "pattern": "^[0-9]{6,10}$"},
+            "description": {"type": "string", "minLength": 1},
+            "unit_of_measure": {"type": "string"},
+            "origin_country": {"type": "string", "pattern": "^[A-Z]{2}$"}
+          }
+        }
+      }
+    }
+  ]
+}

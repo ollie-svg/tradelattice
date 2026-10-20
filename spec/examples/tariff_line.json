@@ -1,0 +1,17 @@
+{
+  "id": "cbsa_tariff:0902.30.00.00",
+  "type": "tariff_line",
+  "source": "cbsa_tariff",
+  "observed_at": "2026-01-01T00:00:00Z",
+  "jurisdiction": "CA",
+  "attributes": {
+    "hs_code": "09023000",
+    "description": "Black tea (fermented) and partly fermented tea, in immediate packings of a content not exceeding 3 kg",
+    "rates": [
+      {"treatment": "MFN", "rate": "Free"},
+      {"treatment": "CUSMA", "rate": "Free"}
+    ],
+    "effective_from": "2026-01-01",
+    "effective_to": null
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/tariff_line.schema.json",
+  "title": "TariffLine",
+  "allOf": [
+    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "tariff_line"},
+        "attributes": {
+          "type": "object",
+          "required": ["hs_code", "description", "rates", "effective_from"],
+          "additionalProperties": false,
+          "properties": {
+            "hs_code": {"type": "string", "pattern": "^[0-9]{6,10}$"},
+            "description": {"type": "string", "minLength": 1},
+            "rates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["treatment", "rate"],
+                "additionalProperties": false,
+                "properties": {
+                  "treatment": {"type": "string", "minLength": 1, "description": "e.g. MFN, CUSMA."},
+                  "rate": {"type": "string", "minLength": 1, "description": "e.g. 6.5%, Free, $1.20/kg."}
+                }
+              }
+            },
+            "effective_from": {"type": "string", "format": "date"},
+            "effective_to": {"type": ["string", "null"], "format": "date"}
+          }
+        }
+      }
+    }
+  ]
+}

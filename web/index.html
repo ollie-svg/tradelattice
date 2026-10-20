@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenGoods</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>OpenGoods</h1>
+  <p id="status" role="status" aria-live="polite">Checking API&hellip;</p>
+</header>
+<main>
+  <section aria-labelledby="h-tariff">
+    <h2 id="h-tariff">Tariff lookup</h2>
+    <form id="tariff-form">
+      <label for="t-hs">HS code</label>
+      <input id="t-hs" name="hs" inputmode="numeric" placeholder="e.g. 8471.30" required>
+      <button type="submit">Look up</button>
+    </form>
+    <div id="tariff-out" class="out" aria-live="polite"></div>
+  </section>
+
+  <section aria-labelledby="h-cost">
+    <h2 id="h-cost">Landed cost</h2>
+    <form id="cost-form">
+      <label for="c-hs">HS code</label>
+      <input id="c-hs" required inputmode="numeric">
+      <label for="c-origin">Origin country (2 letters)</label>
+      <input id="c-origin" required minlength="2" maxlength="2" pattern="[A-Za-z]{2}" placeholder="US">
+      <label for="c-amount">Declared value</label>
+      <input id="c-amount" type="number" min="0" step="any" required>
+      <label for="c-currency">Currency</label>
+      <input id="c-currency" value="CAD" maxlength="3" required>
+      <label for="c-treatment">Treatment</label>
+      <input id="c-treatment" value="MFN">
+      <button type="submit">Calculate</button>
+    </form>
+    <div id="cost-out" class="out" aria-live="polite"></div>
+  </section>
+
+  <section class="wide" aria-labelledby="h-tender">
+    <h2 id="h-tender">Tender search</h2>
+    <form id="tender-form">
+      <label for="s-q">Search</label>
+      <input id="s-q" type="search" placeholder="e.g. laptops">
+      <label for="s-level">Buyer level</label>
+      <select id="s-level">
+        <option value="">Any</option>
+        <option>federal</option>
+        <option>provincial</option>
+        <option>municipal</option>
+        <option>other</option>
+      </select>
+      <button type="submit">Search</button>
+    </form>
+    <div id="tender-out" class="out" aria-live="polite"></div>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

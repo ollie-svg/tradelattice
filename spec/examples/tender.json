@@ -1,0 +1,17 @@
+{
+  "id": "canadabuys:ws1234567890",
+  "type": "tender",
+  "source": "canadabuys",
+  "observed_at": "2026-03-01T14:00:00Z",
+  "jurisdiction": "CA",
+  "attributes": {
+    "title": "Supply of winter road maintenance salt",
+    "buyer": {"name": "Public Services and Procurement Canada", "jurisdiction": "CA", "level": "federal"},
+    "category_codes": ["GSIN:N9640", "UNSPSC:12352104"],
+    "published_at": "2026-02-27T15:00:00Z",
+    "closes_at": "2026-04-02T19:00:00Z",
+    "value_estimate": {"amount": 450000, "currency": "CAD"},
+    "url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ws1234567890",
+    "status": "open"
+  }
+}

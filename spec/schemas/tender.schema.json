@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/tender.schema.json",
+  "title": "Tender",
+  "allOf": [
+    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "tender"},
+        "attributes": {
+          "type": "object",
+          "required": ["title", "buyer", "published_at", "url", "status"],
+          "additionalProperties": false,
+          "properties": {
+            "title": {"type": "string", "minLength": 1},
+            "buyer": {
+              "type": "object",
+              "required": ["name", "jurisdiction", "level"],
+              "additionalProperties": false,
+              "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "jurisdiction": {"type": "string", "pattern": "^[A-Z]{2}(-[A-Z0-9]{1,3})?$"},
+                "level": {"enum": ["federal", "provincial", "municipal", "other"]}
+              }
+            },
+            "category_codes": {"type": "array", "items": {"type": "string"}, "description": "UNSPSC/GSIN strings."},
+            "published_at": {"type": "string", "format": "date-time"},
+            "closes_at": {"type": ["string", "null"], "format": "date-time"},
+            "value_estimate": {
+              "oneOf": [
+                {"type": "null"},
+                {
+                  "type": "object",
+                  "required": ["amount", "currency"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "amount": {"type": "number", "minimum": 0},
+                    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"}
+                  }
+                }
+              ]
+            },
+            "url": {"type": "string", "format": "uri"},
+            "status": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  ]
+}

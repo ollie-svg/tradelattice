@@ -1,0 +1,23 @@
+{
+  "id": "manual:shp-2026-000123",
+  "type": "shipment",
+  "source": "manual",
+  "observed_at": "2026-03-05T08:00:00Z",
+  "jurisdiction": "CA-BC",
+  "attributes": {
+    "reference": "SHP-2026-000123",
+    "mode": "sea",
+    "origin": {"country": "CN", "city": "Shanghai", "port_code": "CNSHA"},
+    "destination": {"country": "CA", "region": "BC", "city": "Vancouver", "port_code": "CAVAN"},
+    "line_items": [
+      {
+        "hs_code": "850760",
+        "quantity": 1200,
+        "unit": "pcs",
+        "declared_value": {"amount": 84000, "currency": "USD"}
+      }
+    ],
+    "eta": "2026-04-12T00:00:00Z",
+    "status": "in_transit"
+  }
+}

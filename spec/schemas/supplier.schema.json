@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/supplier.schema.json",
+  "title": "Supplier",
+  "allOf": [
+    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "supplier"},
+        "attributes": {
+          "type": "object",
+          "required": ["name", "address"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "identifiers": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "business_number": {"type": "string"},
+                "duns": {"type": "string"},
+                "website": {"type": "string", "format": "uri"}
+              }
+            },
+            "address": {
+              "type": "object",
+              "required": ["country"],
+              "additionalProperties": false,
+              "properties": {
+                "line1": {"type": "string"},
+                "city": {"type": "string"},
+                "region": {"type": "string"},
+                "postal_code": {"type": "string"},
+                "country": {"type": "string", "pattern": "^[A-Z]{2}$"}
+              }
+            },
+            "capabilities": {"type": "array", "items": {"type": "string"}, "description": "HS codes or free text."},
+            "contact": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "phone": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

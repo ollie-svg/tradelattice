@@ -1,0 +1,13 @@
+{
+  "id": "manual:maple-syrup-bulk-0001",
+  "type": "product",
+  "source": "manual",
+  "observed_at": "2026-01-15T12:00:00Z",
+  "jurisdiction": "CA-QC",
+  "attributes": {
+    "hs_code": "17022000",
+    "description": "Maple sugar and maple syrup",
+    "unit_of_measure": "kg",
+    "origin_country": "CA"
+  }
+}

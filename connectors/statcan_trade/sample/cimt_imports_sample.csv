@@ -1,0 +1,32 @@
+REF_DATE,GEO,HS_CODE,DESCRIPTION,VALUE,QUANTITY,UOM
+2026-01,Canada,100199,"Wheat and meslin, other than durum",1250000,4000,tonne
+2026-01,Canada,100590,"Maize (corn), other than seed",9800000,38500,tonne
+2026-01,Canada,100630,"Semi-milled or wholly milled rice",15400000,16800,tonne
+2026-01,Canada,170199,"Cane or beet sugar, refined",21300000,25600,tonne
+2026-01,Canada,220421,"Wine of fresh grapes, containers 2 L or less",187000000,52300000,l
+2026-01,Canada,252329,"Portland cement",31500000,410000,tonne
+2026-01,Canada,271019,"Petroleum oils, other than crude",640000000,610000000,l
+2026-01,Canada,310210,"Urea",42000000,95000,tonne
+2026-01,Canada,401110,"New pneumatic tires of rubber for motor cars",118000000,2650000,u
+2026-01,Canada,440711,"Coniferous wood, sawn, pine",14500000,31000,m3
+2026-01,Canada,610910,"T-shirts of cotton, knitted",64000000,14200000,u
+2026-01,Canada,640399,"Footwear, uppers of leather",58000000,3900000,pair
+2026-01,Canada,720839,"Hot-rolled flat steel in coils, thickness under 3 mm",73000000,92000,tonne
+2026-01,Canada,730890,"Structures and parts of structures, iron or steel",96000000,48000,tonne
+2026-01,Canada,760612,"Aluminium plates, sheets and strip, alloyed",52000000,14500,tonne
+2026-01,Canada,847130,"Portable data processing machines <= 10 kg",430000000,720000,u
+2026-01,Canada,850760,"Lithium-ion electric accumulators",385000000,21000000,u
+2026-01,Canada,851713,Smartphones,520000000,1100000,u
+2026-01,Canada,870380,"Motor vehicles, electric motor only",910000000,17500,u
+2026-01,Canada,940320,"Other metal furniture",39000000,1250000,u
+2026-02,Canada,100199,"Wheat and meslin, other than durum",1190000,3800,tonne
+2026-02,Canada,100590,"Maize (corn), other than seed",9100000,36000,tonne
+2026-02,Canada,170199,"Cane or beet sugar, refined",20100000,24400,tonne
+2026-02,Canada,271019,"Petroleum oils, other than crude",605000000,598000000,l
+2026-02,Canada,401110,"New pneumatic tires of rubber for motor cars",112000000,2500000,u
+2026-02,Canada,720839,"Hot-rolled flat steel in coils, thickness under 3 mm",70500000,90000,tonne
+2026-02,Canada,850760,"Lithium-ion electric accumulators",371000000,20400000,u
+2026-02,Canada,851713,Smartphones,498000000,1050000,u
+2026-02,Canada,870380,"Motor vehicles, electric motor only",1020000000,19200,u
+2026-02,Canada,950300,"Tricycles, scooters, pedal cars and similar toys",12000000,0,u
+2026-02,Canada,961900,"Sanitary towels, tampons, napkin liners",0,0,kg

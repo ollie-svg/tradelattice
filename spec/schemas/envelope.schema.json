@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/envelope.schema.json",
+  "title": "Envelope",
+  "description": "Common wrapper shared by every OpenGoods record.",
+  "type": "object",
+  "required": ["id", "type", "source", "observed_at", "jurisdiction", "attributes"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9_.~-]+:[A-Za-z0-9_.~:%/-]+$", "description": "URI-safe, globally unique: <source>:<native_id>."},
+    "type": {"enum": ["product", "tariff_line", "supplier", "tender", "shipment", "price_observation"]},
+    "source": {"type": "string", "minLength": 1, "description": "Connector name."},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "jurisdiction": {"type": "string", "pattern": "^[A-Z]{2}(-[A-Z0-9]{1,3})?$", "description": "ISO 3166-1 alpha-2, optional subdivision (e.g. CA-BC)."},
+    "attributes": {"type": "object"}
+  }
+}

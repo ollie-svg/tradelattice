@@ -1,0 +1,23 @@
+{
+  "id": "manual:acme-steel-bc",
+  "type": "supplier",
+  "source": "manual",
+  "observed_at": "2026-02-10T09:30:00-08:00",
+  "jurisdiction": "CA-BC",
+  "attributes": {
+    "name": "Pacific Rim Steel Fabricators Ltd.",
+    "identifiers": {
+      "business_number": "123456789RC0001",
+      "website": "https://example.ca"
+    },
+    "address": {
+      "line1": "1200 Waterfront Rd",
+      "city": "Vancouver",
+      "region": "BC",
+      "postal_code": "V6B 1A1",
+      "country": "CA"
+    },
+    "capabilities": ["730890", "structural steel fabrication"],
+    "contact": {"name": "Sales Desk", "email": "sales@example.ca", "phone": "+1-604-555-0100"}
+  }
+}

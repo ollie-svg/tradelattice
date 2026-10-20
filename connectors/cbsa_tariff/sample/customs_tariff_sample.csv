@@ -1,0 +1,40 @@
+tariff_item,description,unit,mfn_rate,preferential_tariffs
+0201.10.00.10,"Carcasses and half-carcasses of bovine animals, fresh or chilled",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+0207.14.00.10,"Cuts and offal of chickens, frozen",kg,"238%","CUSMA:Free;CPTPP:Free (within quota)"
+0402.10.00.10,"Milk powder, not exceeding 1.5% fat",kg,"$2.37/kg (within quota Free)",CUSMA:Free;CPTPP:Free
+0709.60.00.10,"Peppers of the genus Capsicum or Pimenta, fresh or chilled",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+0902.30.00.00,"Black tea (fermented) and partly fermented tea, in immediate packings not exceeding 3 kg",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+1001.99.00.10,"Wheat and meslin, other than durum wheat",tonne,Free,CUSMA:Free;CPTPP:Free
+1005.90.00.10,"Maize (corn), other than seed",tonne,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+1006.30.00.10,"Semi-milled or wholly milled rice",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+1512.19.00.10,"Sunflower-seed or safflower oil, refined",kg,"6%",CUSMA:Free;CPTPP:Free;GPT:3%
+1701.99.00.10,"Cane or beet sugar, refined, in solid form",kg,"$0.0214/kg",CUSMA:Free;CPTPP:Free
+1702.20.00.10,"Maple sugar and maple syrup",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+2204.21.00.10,"Wine of fresh grapes, in containers holding 2 L or less",l,"$0.0165/L",CUSMA:Free;CPTPP:Free
+2523.29.00.10,"Portland cement, other than white cement",tonne,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+2710.19.00.10,"Petroleum oils, other than crude, not containing biodiesel",l,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+3004.90.00.10,"Medicaments, put up in measured doses, n.e.s.",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+3102.10.00.10,"Urea, whether or not in aqueous solution",tonne,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+3923.30.00.10,"Carboys, bottles, flasks and similar articles, of plastics",kg,"6.5%",CUSMA:Free;CPTPP:Free;GPT:4.5%
+4011.10.00.10,"New pneumatic tires, of rubber, for motor cars",u,"6%",CUSMA:Free;CPTPP:Free;GPT:Free
+4407.11.00.10,"Coniferous wood, sawn lengthwise, thickness exceeding 6 mm, pine",m3,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+4819.10.00.10,"Cartons, boxes and cases, of corrugated paper or paperboard",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+5208.12.00.10,"Woven fabrics of cotton, plain weave, weighing more than 100 g/m2",m2,"8%",CUSMA:Free;CPTPP:Free;GPT:5.5%
+6109.10.00.10,"T-shirts, singlets and other vests, of cotton, knitted",u,"16%",CUSMA:Free;CPTPP:7%;GPT:11%
+6403.99.00.10,"Footwear with outer soles of rubber, plastics, leather; uppers of leather",pair,"18%",CUSMA:Free;CPTPP:9%;GPT:13%
+7208.39.00.10,"Flat-rolled products of iron or non-alloy steel, hot-rolled, in coils, thickness under 3 mm",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+7308.90.00.10,"Structures and parts of structures, of iron or steel, n.e.s.",kg,"6.5%",CUSMA:Free;CPTPP:Free;GPT:4%
+7318.15.00.10,"Screws and bolts of iron or steel, threaded, whether or not with nuts",kg,"6%",CUSMA:Free;CPTPP:Free;GPT:Free
+7606.12.00.10,"Aluminium plates, sheets and strip, alloyed, thickness exceeding 0.2 mm",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+8408.20.00.10,"Compression-ignition internal combustion piston engines for vehicles of Chapter 87",u,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+8414.51.00.10,"Table, floor, wall, window, ceiling or roof fans, motor not exceeding 125 W",u,"8%",CUSMA:Free;CPTPP:Free;GPT:5.5%
+8471.30.00.10,"Portable automatic data processing machines, weighing not more than 10 kg",u,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+8501.10.00.10,"Electric motors of an output not exceeding 37.5 W",u,"5%",CUSMA:Free;CPTPP:Free;GPT:2.5%
+8507.60.00.10,"Lithium-ion electric accumulators",u,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+8517.13.00.10,"Smartphones",u,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+8528.72.00.10,"Reception apparatus for television, colour, incorporating a screen",u,"Free",CUSMA:Free;CPTPP:Free;GPT:Free
+8703.80.00.10,"Motor vehicles principally designed for transport of persons, electric motor only",u,"6.1%",CUSMA:Free;CPTPP:Free
+8708.30.00.10,"Brakes and servo-brakes and parts thereof, for motor vehicles",u,"6%",CUSMA:Free;CPTPP:Free;GPT:Free
+9403.20.00.10,"Other metal furniture",u,"9.5%",CUSMA:Free;CPTPP:Free;GPT:6.5%
+9503.00.00.10,"Tricycles, scooters, pedal cars and similar wheeled toys; dolls' carriages; reduced-size models",u,Free,CUSMA:Free;CPTPP:Free;GPT:Free
+9619.00.00.10,"Sanitary towels (pads) and tampons, napkins and napkin liners for babies, of any material",kg,Free,CUSMA:Free;CPTPP:Free;GPT:Free

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengoods.dev/schemas/v0.1/shipment.schema.json",
+  "title": "Shipment",
+  "$defs": {
+    "place": {
+      "type": "object",
+      "required": ["country"],
+      "additionalProperties": false,
+      "properties": {
+        "country": {"type": "string", "pattern": "^[A-Z]{2}$"},
+        "region": {"type": "string"},
+        "city": {"type": "string"},
+        "port_code": {"type": "string"}
+      }
+    }
+  },
+  "allOf": [
+    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "shipment"},
+        "attributes": {
+          "type": "object",
+          "required": ["reference", "mode", "origin", "destination", "line_items"],
+          "additionalProperties": false,
+          "properties": {
+            "reference": {"type": "string", "minLength": 1},
+            "mode": {"enum": ["road", "rail", "air", "sea", "multimodal"]},
+            "origin": {"$ref": "#/$defs/place"},
+            "destination": {"$ref": "#/$defs/place"},
+            "line_items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["hs_code", "quantity", "unit", "declared_value"],
+                "additionalProperties": false,
+                "properties": {
+                  "hs_code": {"type": "string", "pattern": "^[0-9]{6,10}$"},
+                  "quantity": {"type": "number", "minimum": 0},
+                  "unit": {"type": "string", "minLength": 1},
+                  "declared_value": {
+                    "type": "object",
+                    "required": ["amount", "currency"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "amount": {"type": "number", "minimum": 0},
+                      "currency": {"type": "string", "pattern": "^[A-Z]{3}$"}
+                    }
+                  }
+                }
+              }
+            },
+            "eta": {"type": ["string", "null"], "format": "date-time"},
+            "status": {"type": "string"}
+          }
+        }
+      }
+    }
+  ]
+}
