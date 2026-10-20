@@ -28,10 +28,10 @@ All six required fields appear on every record.
 
 ## Schema files
 
-- [envelope.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/envelope.schema.json)
-- [product.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/product.schema.json)
-- [tariff_line.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/tariff_line.schema.json)
-- [supplier.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/supplier.schema.json)
-- [tender.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/tender.schema.json)
-- [shipment.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/shipment.schema.json)
-- [price_observation.schema.json](https://github.com/REPLACE-ME/tradelattice/blob/main/spec/schemas/price_observation.schema.json)
+- [envelope.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/envelope.schema.json)
+- [product.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/product.schema.json)
+- [tariff_line.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/tariff_line.schema.json)
+- [supplier.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/supplier.schema.json)
+- [tender.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/tender.schema.json)
+- [shipment.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/shipment.schema.json)
+- [price_observation.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/price_observation.schema.json)

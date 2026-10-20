@@ -5,7 +5,7 @@ TradeLattice needs Python 3.11 or newer. The steps below use only the bundled sa
 ## Install
 
 ```
-git clone https://github.com/REPLACE-ME/tradelattice
+git clone https://github.com/ollie-svg/tradelattice
 cd tradelattice
 pip install -e .[dev]
 ```

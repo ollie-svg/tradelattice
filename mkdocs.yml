@@ -1,7 +1,7 @@
 site_name: TradeLattice
 site_url: https://tradelattice.ca
 # Placeholder: replace with the real repository URL before launch.
-repo_url: https://github.com/REPLACE-ME/tradelattice
+repo_url: https://github.com/ollie-svg/tradelattice
 copyright: "© 2026 TradeLattice Contributors · Apache-2.0 · Powered by <a href='https://browes.ai'>Browes AI</a>"
 
 theme:
