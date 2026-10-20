@@ -1,4 +1,4 @@
-"""Shared helpers for OpenGoods connectors."""
+"""Shared helpers for TradeLattice connectors."""
 from __future__ import annotations
 
 import argparse

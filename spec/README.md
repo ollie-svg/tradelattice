@@ -1,13 +1,13 @@
-# OpenGoods Specification
+# TradeLattice Specification
 
-The canonical data model for OpenGoods: JSON Schema (draft 2020-12) definitions for six record types
+The canonical data model for TradeLattice: JSON Schema (draft 2020-12) definitions for six record types
 that share a common envelope. The spec is country-agnostic; Canada is the first target.
 
 - `schemas/envelope.schema.json` - fields shared by every record (`id`, `type`, `source`, `observed_at`, `jurisdiction`, `attributes`).
 - `schemas/<type>.schema.json` - one per type: `product`, `tariff_line`, `supplier`, `tender`, `shipment`, `price_observation`. Each `allOf`s the envelope, pins `type` to a constant and constrains `attributes` (no extra properties).
 - `examples/<type>.json` - one valid example per type.
 
-Schema `$id`s have the form `https://opengoods.dev/schemas/v0.1/<name>.schema.json`.
+Schema `$id`s have the form `https://tradelattice.dev/schemas/v0.1/<name>.schema.json`.
 
 ## Versioning
 

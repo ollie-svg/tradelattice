@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengoods.dev/schemas/v0.1/tariff_line.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.1/tariff_line.schema.json",
   "title": "TariffLine",
   "allOf": [
-    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.1/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "tariff_line"},

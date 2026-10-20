@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengoods.dev/schemas/v0.1/envelope.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.1/envelope.schema.json",
   "title": "Envelope",
-  "description": "Common wrapper shared by every OpenGoods record.",
+  "description": "Common wrapper shared by every TradeLattice record.",
   "type": "object",
   "required": ["id", "type", "source", "observed_at", "jurisdiction", "attributes"],
   "additionalProperties": false,

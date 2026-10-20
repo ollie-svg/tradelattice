@@ -1,4 +1,4 @@
-"""Validate OpenGoods record files against the v0.1 JSON Schemas.
+"""Validate TradeLattice record files against the v0.1 JSON Schemas.
 
 Usage: python -m spec.validate spec/examples/*.json
 Each file may contain a single record or an array of records.

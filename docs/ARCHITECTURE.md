@@ -1,4 +1,4 @@
-# OpenGoods — Architecture
+# TradeLattice — Architecture
 
 **Purpose.** An open data standard and reference stack for coordinating goods and services across a national economy. Canada is the first target; the schema is country-agnostic.
 
@@ -48,7 +48,7 @@ A builder who cannot confirm a live URL ships the sample-file path and documents
 
 ## API (v0.1)
 
-FastAPI, Python 3.11+, SQLAlchemy 2, SQLite file `opengoods.db` by default, `DATABASE_URL` env overrides. Single table `records` (`id PK, type, source, jurisdiction, observed_at, attributes JSON`) plus indexes on `type`, `(type, source)`. Validation on write against the spec schemas (jsonschema library).
+FastAPI, Python 3.11+, SQLAlchemy 2, SQLite file `tradelattice.db` by default, `DATABASE_URL` env overrides. Single table `records` (`id PK, type, source, jurisdiction, observed_at, attributes JSON`) plus indexes on `type`, `(type, source)`. Validation on write against the spec schemas (jsonschema library).
 
 Endpoints:
 - `GET /health`
@@ -69,7 +69,7 @@ Single `web/index.html` + `web/app.js` + `web/style.css`. No build step. Three p
 
 ## Repo scaffolding
 
-- `LICENSE` Apache-2.0, copyright "OpenGoods Contributors".
+- `LICENSE` Apache-2.0, copyright "TradeLattice Contributors".
 - `README.md`: one-paragraph pitch, 5-command quickstart (`pip install -e .[dev]`, run connectors from samples, load, serve, open browser), architecture pointer, contribution pointer.
 - `CONTRIBUTING.md`, `GOVERNANCE.md` (BDFL → maintainer council at 3+ maintainers), `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md`.
 - `pyproject.toml` single project with extras `[dev]` (pytest, ruff).

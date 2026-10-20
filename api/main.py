@@ -1,4 +1,4 @@
-"""OpenGoods API."""
+"""TradeLattice API."""
 from __future__ import annotations
 
 import re
@@ -28,7 +28,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="OpenGoods API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="TradeLattice API", version="0.1.0", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -155,7 +155,7 @@ else:
 
     @app.get("/", include_in_schema=False)
     def index_placeholder() -> PlainTextResponse:
-        return PlainTextResponse("OpenGoods API is running. web/index.html not found.")
+        return PlainTextResponse("TradeLattice API is running. web/index.html not found.")
 
 
 if WEB_DIR.is_dir():

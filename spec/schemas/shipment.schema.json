@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengoods.dev/schemas/v0.1/shipment.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.1/shipment.schema.json",
   "title": "Shipment",
   "$defs": {
     "place": {
@@ -16,7 +16,7 @@
     }
   },
   "allOf": [
-    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.1/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "shipment"},

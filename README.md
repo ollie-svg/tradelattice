@@ -1,6 +1,6 @@
-# OpenGoods
+# TradeLattice
 
-OpenGoods is an open data standard and reference stack for coordinating goods and services across a national economy. It defines a small, stable JSON Schema data model (products, tariff lines, suppliers, tenders, shipments, price observations), ships connectors that map real Canadian public datasets into it, and provides an API and web UI that are useful to a single user on day one. Canada is the first target; the schema is country-agnostic.
+TradeLattice is an open data standard and reference stack for coordinating goods and services across a national economy. It defines a small, stable JSON Schema data model (products, tariff lines, suppliers, tenders, shipments, price observations), ships connectors that map real Canadian public datasets into it, and provides an API and web UI that are useful to a single user on day one. Canada is the first target; the schema is country-agnostic.
 
 ## Quickstart
 

@@ -9,7 +9,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-DEFAULT_URL = "sqlite:///opengoods.db"
+DEFAULT_URL = "sqlite:///tradelattice.db"
 
 
 class Base(DeclarativeBase):

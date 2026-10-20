@@ -2,7 +2,7 @@
 
 ## Current model: BDFL
 
-OpenGoods starts with a Benevolent Dictator For Life (the founding maintainer), who has final say on the schema, releases and project direction, and who seeks input in public issues and pull requests.
+TradeLattice starts with a Benevolent Dictator For Life (the founding maintainer), who has final say on the schema, releases and project direction, and who seeks input in public issues and pull requests.
 
 ## Maintainers
 

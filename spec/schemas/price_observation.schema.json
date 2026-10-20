@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://opengoods.dev/schemas/v0.1/price_observation.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.1/price_observation.schema.json",
   "title": "PriceObservation",
   "allOf": [
-    {"$ref": "https://opengoods.dev/schemas/v0.1/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.1/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "price_observation"},

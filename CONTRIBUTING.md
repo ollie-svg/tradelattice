@@ -1,4 +1,4 @@
-# Contributing to OpenGoods
+# Contributing to TradeLattice
 
 Thanks for helping. The project is schema-first: the data model in `spec/` is the product.
 
