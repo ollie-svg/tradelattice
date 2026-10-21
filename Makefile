@@ -25,3 +25,13 @@ docs:
 
 docs-serve:
 	mkdocs serve
+
+.PHONY: edition-check edition-diff
+
+edition-check:
+	$(PY) -m connectors.cbsa_tariff check --state data/cbsa_edition.json
+
+# usage: make edition-diff OLD=old.jsonl NEW=new.jsonl
+edition-diff:
+	@test -n "$(OLD)" -a -n "$(NEW)" || (echo "usage: make edition-diff OLD=old.jsonl NEW=new.jsonl" && exit 2)
+	$(PY) -m connectors.cbsa_tariff diff $(OLD) $(NEW) --markdown

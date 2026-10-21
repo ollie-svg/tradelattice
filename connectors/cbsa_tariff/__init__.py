@@ -6,6 +6,7 @@ https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/<year>/html/<revision>/c
 from __future__ import annotations
 
 import logging
+import re
 import time
 import urllib.error
 import urllib.request
@@ -50,7 +51,35 @@ def parse_rates(mfn: str, preferential: str) -> list[dict[str, str]]:
 
 
 def chapter_url(edition: dict[str, str], chapter: int) -> str:
+    """URL of a chapter page *as published under this edition's own revision*.
+
+    Only a fallback: an edition's index page points each chapter at whichever
+    revision last changed it (T2026-1 changed one chapter; its other 98 links go
+    to revision 00). Use `chapter_urls()` for the real map.
+    """
     return CHAPTER_URL.format(year=edition["name"][1:5], revision=edition["revision"], nn=chapter)
+
+
+def index_url(edition: dict[str, str]) -> str:
+    year = edition["name"][1:5]
+    rev = int(edition["revision"])
+    suffix = f"-{rev}" if rev else ""
+    return f"https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/{year}/html/tblmod{suffix}-eng.html"
+
+
+_CHAPTER_LINK = re.compile(r'href="(/trade-commerce/tariff-tarif/\d{4}/html/\d{2}/ch(\d{2})-eng\.html)"')
+
+
+def chapter_urls(edition: dict[str, str], index_html: str | None = None) -> dict[int, str]:
+    """Map chapter number -> absolute chapter URL by reading the edition's index page."""
+    if index_html is None:
+        index_html = _get(index_url(edition))
+        if index_html is None:
+            raise RuntimeError(f"edition index not found: {index_url(edition)}")
+    urls: dict[int, str] = {}
+    for path, nn in _CHAPTER_LINK.findall(index_html):
+        urls.setdefault(int(nn), "https://www.cbsa-asfc.gc.ca" + path)
+    return urls
 
 
 def _get(url: str) -> str | None:
@@ -101,12 +130,13 @@ def fetch(
         for n in nums:
             if not 1 <= n <= 99:
                 raise ValueError(f"chapter out of range 1..99: {n}")
+        urls = chapter_urls(ed)
         first = True
         for n in nums:
             if not first:
                 time.sleep(REQUEST_DELAY_S)
             first = False
-            url = chapter_url(ed, n)
+            url = urls.get(n) or chapter_url(ed, n)
             html_text = _get(url)
             if html_text is None:
                 log.warning("cbsa_tariff: chapter %02d not found (404), skipping: %s", n, url)

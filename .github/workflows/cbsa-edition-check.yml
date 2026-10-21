@@ -1,0 +1,67 @@
+name: cbsa-edition-check
+on:
+  schedule:
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+permissions:
+  issues: write
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Check for a new edition
+        id: check
+        run: |
+          set +e
+          python -m connectors.cbsa_tariff check --state data/cbsa_edition.json | tee check.txt
+          code=${PIPESTATUS[0]}
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" != "0" ] && [ "$code" != "10" ]; then exit "$code"; fi
+      - name: Diff editions and open issue
+        if: steps.check.outputs.code == '10'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set +e
+          NEW_NAME=$(python -c "import json;print(json.load(open('data/cbsa_edition.json'))['name'])")
+          NEW_DATE=$(python -c "import json;print(json.load(open('data/cbsa_edition.json'))['effective_from'])")
+          OLD_NAME=$(python -c "
+          import sys
+          from connectors.cbsa_tariff import editions as e
+          eds = e.list_editions(int('$NEW_NAME'[1:5]))
+          names = [x['name'] for x in eds]
+          i = names.index('$NEW_NAME')
+          print(names[i + 1] if i + 1 < len(names) else '')
+          ")
+          if [ -z "$OLD_NAME" ]; then
+            echo "No previous revision in the same year; diff skipped. Run: $RUN_URL" > report.md
+          else
+            T="$RUNNER_TEMP"
+            python -m connectors.cbsa_tariff --live --edition "$NEW_NAME" --out "$T/new.jsonl" \
+              && python -m connectors.cbsa_tariff --live --edition "$OLD_NAME" --out "$T/old.jsonl" \
+              && python -m connectors.cbsa_tariff diff "$T/old.jsonl" "$T/new.jsonl" --markdown \
+                   --old-name "$OLD_NAME" --new-name "$NEW_NAME" > report.md
+            if [ $? -ne 0 ]; then
+              echo "Edition diff failed; see workflow run: $RUN_URL" > report.md
+            fi
+          fi
+          gh issue create --title "New CBSA tariff edition: $NEW_NAME (effective $NEW_DATE)" \
+            --body-file report.md
+      - name: Commit state
+        if: steps.check.outputs.code == '10'
+        run: |
+          NAME=$(python -c "import json;print(json.load(open('data/cbsa_edition.json'))['name'])")
+          git config user.name "tradelattice-bot"
+          git config user.email "tradelattice-bot@users.noreply.github.com"
+          git add data/cbsa_edition.json
+          git commit -m "chore: record CBSA edition $NAME"
+          git push origin HEAD:main
