@@ -13,6 +13,7 @@ from sqlalchemy import String, cast, func, select
 from sqlalchemy.orm import Session
 
 from .db import get_session, init_db
+from .duty import DutyInputError, NotApplicable, basis, evaluate, parse_duty
 from .models import Record
 from .schemas import LandedCostIn, LandedCostOut, RecordOut, UpsertResult
 from .store import upsert_records
@@ -110,16 +111,6 @@ def get_tariff(hs_code: str, session: Db) -> dict:
     return _best_tariff(session, _normalize_hs(hs_code)).to_dict()
 
 
-def parse_rate(rate: str) -> float:
-    s = rate.strip()
-    if s.lower() == "free":
-        return 0.0
-    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*%", s)
-    if m:
-        return float(m.group(1))
-    raise HTTPException(422, "specific rates not supported in v0.1")
-
-
 @app.post("/landed-cost", response_model=LandedCostOut)
 def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
     hs = _normalize_hs(body.hs_code)
@@ -131,9 +122,16 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
     )
     if rate_str is None:
         raise HTTPException(404, f"no rate for treatment {treatment!r} on {line.attributes['hs_code']}")
-    pct = parse_rate(rate_str)
     amount = body.declared_value.amount
-    duty = round(amount * pct / 100, 2)
+    try:
+        node = parse_duty(rate_str)
+        if isinstance(node, NotApplicable):
+            raise DutyInputError("rate not applicable for this treatment")
+        raw_duty, components = evaluate(node, amount, body.quantity, body.unit)
+    except DutyInputError as e:
+        raise HTTPException(422, str(e)) from e
+    duty = round(raw_duty, 2)
+    pct = round(duty / amount * 100, 2) if amount else 0.0
     return LandedCostOut(
         hs_code=hs,
         matched_hs_code=str(line.attributes["hs_code"]),
@@ -142,6 +140,9 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
         duty=duty,
         total=round(amount + duty, 2),
         currency=body.declared_value.currency,
+        rate=rate_str,
+        components=components,
+        basis=basis(node),
     )
 
 

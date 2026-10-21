@@ -80,13 +80,17 @@ $('cost-form').addEventListener('submit', (ev) => {
     declared_value: { amount: Number($('c-amount').value), currency: $('c-currency').value.trim().toUpperCase() || 'CAD' },
     treatment: $('c-treatment').value.trim() || 'MFN',
   };
+  if ($('c-qty').value !== '') body.quantity = Number($('c-qty').value);
+  if ($('c-unit').value.trim()) body.unit = $('c-unit').value.trim();
   run(ev.target, $('cost-out'), async () => {
     const r = await api('/landed-cost', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
     });
-    return `<dl><dt>Duty rate</dt><dd>${esc(r.duty_rate)}</dd>
+    return `<dl><dt>Rate</dt><dd>${esc(r.rate)}</dd>
+      <dt>Effective duty rate</dt><dd>${esc(r.duty_rate)}%</dd>
       <dt>Duty</dt><dd>${money(r.duty)}</dd>
       <dt>Total</dt><dd><strong>${money(r.total)}</strong></dd></dl>
+      ${(r.components || []).length ? '<ul class="muted">' + r.components.map((c) => `<li>${esc(c)}</li>`).join('') + '</ul>' : ''}
       <p class="muted">GST is not included.</p>`;
   });
 });

@@ -142,11 +142,22 @@ def test_landed_cost(client):
         "duty": 13.0,
         "total": 213.0,
         "currency": "CAD",
+        "rate": "6.5%",
+        "components": ["6.5% ad valorem = 13.00"],
+        "basis": "ad_valorem",
     }
     assert landed(client, treatment="CUSMA").json()["duty"] == 0
     assert landed(client, treatment="ZERO").json()["duty_rate"] == 0
     s = landed(client, treatment="SPEC")
-    assert s.status_code == 422 and "specific rates not supported in v0.1" in s.text
+    assert s.status_code == 422 and "kg" in s.json()["detail"]
+    ok = landed(client, treatment="SPEC", quantity=10, unit="kg")
+    assert ok.status_code == 200
+    # 1.20 * 10 kg = 12.00; effective 12/200*100 = 6.0
+    assert ok.json()["duty"] == 12.0 and ok.json()["basis"] == "specific"
+    assert ok.json()["duty_rate"] == 6.0
+    assert ok.json()["components"] == ["$1.20/kg × 10 kg = 12.00"]
+    bad = landed(client, treatment="SPEC", quantity=10, unit="litre")
+    assert bad.status_code == 422
     assert landed(client, treatment="NOPE").status_code == 404
     assert landed(client, hs_code="9999999999").status_code == 404
 
@@ -166,3 +177,32 @@ def test_cli_load(tmp_path):
     assert cli.load(str(f)) == (3, 1)  # idempotent
     with TestClient(app) as c:
         assert len(c.get("/records?type=tariff_line").json()) == 3
+
+
+def test_landed_cost_compound_and_na(client):
+    client.post(
+        "/records",
+        json=[
+            tariff(
+                "090230",
+                [
+                    {"treatment": "MFN", "rate": "5% but not less than 4.74¢/kg or more than 9.48¢/kg"},
+                    {"treatment": "NA", "rate": "Free, CPUKT N/A"},
+                ],
+            )
+        ],
+    )
+    r = landed(client, declared_value={"amount": 1000, "currency": "CAD"}, quantity=2000, unit="kg")
+    assert r.status_code == 200
+    j = r.json()
+    # 5% = 50; floor 0.0474*2000 = 94.80; cap 0.0948*2000 = 189.60 -> 94.80; 94.8/1000*100 = 9.48
+    assert j["duty"] == 94.8 and j["duty_rate"] == 9.48 and j["basis"] == "compound"
+    assert j["rate"].startswith("5% but")
+    assert j["components"] == [
+        "5% ad valorem = 50.00",
+        "floor 4.74¢/kg × 2000 kg = 94.80",
+        "cap 9.48¢/kg × 2000 kg = 189.60",
+    ]
+    assert landed(client).status_code == 422
+    na = landed(client, treatment="NA")
+    assert na.status_code == 422 and na.json()["detail"] == "rate not applicable for this treatment"

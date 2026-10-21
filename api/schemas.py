@@ -1,7 +1,7 @@
 """Pydantic response/request models."""
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -30,6 +30,8 @@ class LandedCostIn(BaseModel):
     origin_country: str
     declared_value: Money
     treatment: str | None = None
+    quantity: float | None = None
+    unit: str | None = None
 
 
 class LandedCostOut(BaseModel):
@@ -40,3 +42,6 @@ class LandedCostOut(BaseModel):
     duty: float
     total: float
     currency: str
+    rate: str
+    components: list[str]
+    basis: Literal["ad_valorem", "specific", "compound"]

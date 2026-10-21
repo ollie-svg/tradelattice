@@ -35,6 +35,10 @@
       <input id="c-currency" value="CAD" maxlength="3" required>
       <label for="c-treatment">Treatment</label>
       <input id="c-treatment" value="MFN">
+      <label for="c-qty">Quantity (for specific rates)</label>
+      <input id="c-qty" type="number" min="0" step="any">
+      <label for="c-unit">Unit</label>
+      <input id="c-unit" placeholder="kg">
       <button type="submit">Calculate</button>
     </form>
     <div id="cost-out" class="out" aria-live="polite"></div>
