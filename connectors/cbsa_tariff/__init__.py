@@ -1,28 +1,42 @@
 """CBSA Customs Tariff schedule -> TariffLine records.
 
-TODO(live): the schedule is published at
-https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/ ; the exact CSV/XLSX URL is unconfirmed.
+Live mode parses the HTML chapter pages published at
+https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/<year>/html/<revision>/chNN-eng.html
 """
 from __future__ import annotations
 
-from collections.abc import Iterator
-from datetime import datetime
+import logging
+import time
+import urllib.error
+import urllib.request
+from collections.abc import Iterable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 from connectors._base import (
     Envelope,
     digits_only,
     envelope,
-    live_not_implemented,
     parse_date,
     read_csv,
     to_utc_iso,
 )
+from connectors.cbsa_tariff.parse import parse_chapter_html, parse_preferential
+
+log = logging.getLogger(__name__)
 
 NAME = "cbsa_tariff"
 LIVE_URL = "https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/"
 SAMPLE = Path(__file__).parent / "sample" / "customs_tariff_sample.csv"
 EFFECTIVE_FROM = "2026-01-01"
+# Revision 02 = T2026-2. Assumption: the base edition (T2026) uses revision "00".
+EDITION = {"name": "T2026-2", "revision": "02", "effective_from": "2026-09-01"}
+USER_AGENT = "TradeLattice/0.1 (+https://tradelattice.ca)"
+CHAPTER_URL = (
+    "https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/{year}/html/{revision}/ch{nn:02d}-eng.html"
+)
+REQUEST_DELAY_S = 0.5
+TIMEOUT_S = 30
 
 
 def parse_rates(mfn: str, preferential: str) -> list[dict[str, str]]:
@@ -35,10 +49,72 @@ def parse_rates(mfn: str, preferential: str) -> list[dict[str, str]]:
     return rates
 
 
-def fetch(since: datetime | None = None, live: bool = False) -> Iterator[Envelope]:
+def chapter_url(edition: dict[str, str], chapter: int) -> str:
+    return CHAPTER_URL.format(year=edition["name"][1:5], revision=edition["revision"], nn=chapter)
+
+
+def _get(url: str) -> str | None:
+    """GET a chapter page. Returns None on 404; retries once on any other failure."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    for attempt in (1, 2):
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT_S) as resp:
+                return resp.read().decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
+            if attempt == 2:
+                raise
+        except (urllib.error.URLError, TimeoutError, OSError):
+            if attempt == 2:
+                raise
+        time.sleep(REQUEST_DELAY_S)
+    return None  # pragma: no cover
+
+
+def records_from_html(html_text: str, *, effective_from: str, observed_at: str) -> Iterator[Envelope]:
+    """Map parsed chapter rows to TariffLine envelopes (one per tariff_item + ss)."""
+    for row in parse_chapter_html(html_text):
+        item, ss = row["tariff_item"], row["ss"]
+        attrs = {
+            "hs_code": digits_only(item) + ss,
+            "description": row["description"],
+            "rates": [{"treatment": "MFN", "rate": row["mfn_rate"]}, *parse_preferential(row["preferential"])],
+            "effective_from": effective_from,
+            "effective_to": None,
+        }
+        native_id = f"{item}.{ss}" if ss else item
+        yield envelope(source=NAME, native_id=native_id, type_="tariff_line",
+                       observed_at=observed_at, attributes=attrs)
+
+
+def fetch(
+    since: datetime | None = None,
+    live: bool = False,
+    edition: dict[str, str] | None = None,
+    chapters: Iterable[int] | None = None,
+) -> Iterator[Envelope]:
     """Yield TariffLine envelopes. `since` is ignored: the schedule is a full snapshot."""
     if live:
-        raise live_not_implemented(NAME, LIVE_URL)
+        ed = edition or EDITION
+        nums = sorted(set(chapters)) if chapters is not None else list(range(1, 100))
+        for n in nums:
+            if not 1 <= n <= 99:
+                raise ValueError(f"chapter out of range 1..99: {n}")
+        first = True
+        for n in nums:
+            if not first:
+                time.sleep(REQUEST_DELAY_S)
+            first = False
+            url = chapter_url(ed, n)
+            html_text = _get(url)
+            if html_text is None:
+                log.warning("cbsa_tariff: chapter %02d not found (404), skipping: %s", n, url)
+                continue
+            observed = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+            yield from records_from_html(html_text, effective_from=ed["effective_from"],
+                                         observed_at=observed)
+        return
     observed = to_utc_iso(parse_date(EFFECTIVE_FROM))
     for row in read_csv(SAMPLE):
         item = row["tariff_item"]

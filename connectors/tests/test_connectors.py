@@ -21,7 +21,7 @@ def test_sample_records_validate(name):
     assert len({r["id"] for r in records}) == len(records)
 
 
-@pytest.mark.parametrize("name", NAMES)
+@pytest.mark.parametrize("name", [n for n in NAMES if n != "cbsa_tariff"])
 def test_live_not_implemented(name):
     with pytest.raises(NotImplementedError):
         _fetch(name, live=True)
