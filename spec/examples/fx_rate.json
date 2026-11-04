@@ -1,0 +1,14 @@
+{
+  "id": "boc_fx:2026-10-31:USD",
+  "type": "fx_rate",
+  "source": "boc_fx",
+  "observed_at": "2026-10-31T00:00:00Z",
+  "jurisdiction": "CA",
+  "attributes": {
+    "currency": "USD",
+    "to": "CAD",
+    "rate": "1.3812",
+    "on": "2026-10-31",
+    "publisher": "boc"
+  }
+}

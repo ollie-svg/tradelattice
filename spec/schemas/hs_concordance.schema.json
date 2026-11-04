@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tradelattice.dev/schemas/v0.2/hs_concordance.schema.json",
+  "title": "HsConcordance",
+  "description": "A mapping of one tariff code between two tariff editions. A split is one record per target with relation split; a merge is one record per source with relation merged. to_code is null only when relation is removed.",
+  "allOf": [
+    {"$ref": "https://tradelattice.dev/schemas/v0.2/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "hs_concordance"},
+        "attributes": {
+          "type": "object",
+          "required": ["from_code", "to_code", "relation", "from_edition", "to_edition"],
+          "additionalProperties": false,
+          "properties": {
+            "from_code": {"type": "string", "pattern": "^[0-9]{6,10}$"},
+            "to_code": {"type": ["string", "null"], "pattern": "^[0-9]{6,10}$"},
+            "relation": {"enum": ["same", "renumbered", "split", "merged", "removed"]},
+            "from_edition": {"type": "string", "pattern": "^T\\d{4}(-\\d+)?$"},
+            "to_edition": {"type": "string", "pattern": "^T\\d{4}(-\\d+)?$"},
+            "inferred": {"type": "boolean", "default": false, "description": "True when TradeLattice inferred the mapping rather than loading a published table."},
+            "source_url": {"type": "string", "format": "uri"}
+          },
+          "if": {"required": ["to_code"], "properties": {"to_code": {"type": "null"}}},
+          "then": {"properties": {"relation": {"const": "removed"}}}
+        }
+      }
+    }
+  ]
+}

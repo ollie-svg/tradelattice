@@ -11,6 +11,7 @@
       {"treatment": "MFN", "rate": "Free"},
       {"treatment": "CUSMA", "rate": "Free"}
     ],
+    "edition": "T2026-2",
     "effective_from": "2026-01-01",
     "effective_to": null
   }

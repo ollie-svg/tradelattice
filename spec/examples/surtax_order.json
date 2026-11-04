@@ -1,0 +1,15 @@
+{
+  "id": "cbsa_surtax:example-surtax-2026:7208:US",
+  "type": "surtax_order",
+  "source": "cbsa_surtax",
+  "observed_at": "2026-09-08T00:00:00Z",
+  "jurisdiction": "CA",
+  "attributes": {
+    "hs_prefix": "7208",
+    "origin_country": "US",
+    "pct": "25",
+    "list_id": "example-surtax-2026",
+    "effective_from": "2026-09-08",
+    "effective_to": null
+  }
+}

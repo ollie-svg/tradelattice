@@ -45,6 +45,7 @@ nav:
   - API: api.md
   - Architecture: ARCHITECTURE.md
   - Roadmap: ROADMAP.md
+  - Release notes: release-notes.md
   - ADRs:
       - adr/0001-schema-first.md
       - adr/0002-sqlite-default.md

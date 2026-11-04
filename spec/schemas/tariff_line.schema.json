@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tradelattice.dev/schemas/v0.1/tariff_line.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.2/tariff_line.schema.json",
   "title": "TariffLine",
   "allOf": [
-    {"$ref": "https://tradelattice.dev/schemas/v0.1/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.2/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "tariff_line"},
@@ -26,6 +26,7 @@
                 }
               }
             },
+            "edition": {"type": "string", "pattern": "^T\\d{4}(-\\d+)?$", "description": "Tariff edition, e.g. T2026-2."},
             "effective_from": {"type": "string", "format": "date"},
             "effective_to": {"type": ["string", "null"], "format": "date"}
           }

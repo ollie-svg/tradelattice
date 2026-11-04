@@ -1,0 +1,15 @@
+{
+  "id": "cbsa_concordance:T2026-2:09023010:09023011",
+  "type": "hs_concordance",
+  "source": "cbsa_concordance",
+  "observed_at": "2026-11-01T00:00:00Z",
+  "jurisdiction": "CA",
+  "attributes": {
+    "from_code": "09023010",
+    "to_code": "09023011",
+    "relation": "renumbered",
+    "from_edition": "T2026-2",
+    "to_edition": "T2027-1",
+    "inferred": false
+  }
+}

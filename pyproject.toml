@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tradelattice"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open data standard and reference stack for coordinating goods and services across a national economy."
 readme = "README.md"
 requires-python = ">=3.11"
