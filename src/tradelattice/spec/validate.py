@@ -105,7 +105,11 @@ def main(argv: list[str] | None = None) -> int:
     failed = False
     for name in args:
         try:
-            data = json.loads(Path(name).read_text(encoding="utf-8"))
+            text = Path(name).read_text(encoding="utf-8")
+            if name.endswith(".jsonl"):
+                data = [json.loads(line) for line in text.splitlines() if line.strip()]
+            else:
+                data = json.loads(text)
         except (OSError, ValueError) as exc:
             print(f"FAIL {name}: {exc}")
             failed = True

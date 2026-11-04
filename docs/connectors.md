@@ -7,6 +7,7 @@ A connector maps one public dataset into spec records. Each lives in `src/tradel
 | `cbsa_tariff` | CBSA Customs Tariff schedule | `tariff_line` | Bundled CSV | Not implemented |
 | `canadabuys` | CanadaBuys open tender notices | `tender` | Bundled CSV | Not implemented |
 | `statcan_trade` | Statistics Canada merchandise trade by HS6 | `price_observation` (unit value = value / quantity) | Bundled CSV | Not implemented |
+| `boc_fx` | Bank of Canada Valet daily exchange rates | `fx_rate` | Bundled JSON | Implemented (default useful path) |
 
 ## Run a connector
 
@@ -16,6 +17,18 @@ python -m tradelattice.connectors.canadabuys --out tenders.jsonl --since 2026-01
 ```
 
 Without `--live`, the connector reads its bundled sample and never touches the network. With `--live`, it raises `NotImplementedError` today and names the dataset URL to implement against. See [ADR 0003](adr/0003-connectors-offline-first.md).
+
+## boc_fx
+
+Emits one `fx_rate` per (date, currency) to CAD from the Bank of Canada Valet API (`FX_RATES_DAILY`). Live mode is the useful path; without `--live` it reads a bundled 3-day sample.
+
+```
+python -m tradelattice.connectors.boc_fx --out fx.jsonl --live --start 2026-10-27 --end 2026-11-03 --currencies USD,EUR
+```
+
+Window flags: by default the last 10 calendar days ending today (UTC). `--since` sets the start, `--start` and `--end` set the window explicitly, and `--currencies` filters. The connector always queries a date window, never `recent=N`, which returns stale data.
+
+CBSA valuation uses the BoC rate on the date of direct shipment, so consumers pick the record with `on` <= that date (the latest such one).
 
 ## Edition tracking
 

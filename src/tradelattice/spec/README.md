@@ -26,5 +26,5 @@ pip install -e .[dev]
 python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json
 ```
 
-A file may hold one record or a JSON array of records. The command exits non-zero if any record fails.
+A file may hold one record, a JSON array of records, or (with a `.jsonl` extension) one record per line. The command exits non-zero if any record fails.
 Format keywords (`date-time`, `date`, `uri`) are asserted.

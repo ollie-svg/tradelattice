@@ -30,7 +30,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "tradelattice.spec" = ["schemas/*.json", "examples/*.json"]
-"tradelattice.connectors" = ["*/sample/*.csv", "*/fixtures/*.html"]
+"tradelattice.connectors" = ["*/sample/*.csv", "*/sample/*.json", "*/fixtures/*.html"]
 
 [tool.ruff]
 line-length = 100

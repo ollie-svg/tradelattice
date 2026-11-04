@@ -1,0 +1,594 @@
+{
+ "terms": {
+  "url": "https://www.bankofcanada.ca/terms/"
+ },
+ "groupDetail": {
+  "label": "Daily exchange rates",
+  "description": "Daily average exchange rates for various foreign currencies currently or historically published by the Bank of Canada, representing the value of one unit of foreign currency expressed in Canadian dollars. These rates are typically published once each business day by 16:30 (ET). All Bank of Canada exchange rates are indicative rates only, obtained from averages of aggregated price quotes from financial institutions.",
+  "link": "https://www.bankofcanada.ca/?p=190892",
+  "metadata": {
+   "unit": "Canadian dollars per foreign currency unit",
+   "frequency": "Business daily"
+  }
+ },
+ "seriesDetail": {
+  "FXAUDCAD": {
+   "label": "AUD/CAD",
+   "description": "Daily average exchange rate of the Australian dollar in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Australian dollar",
+    "frequency": "Business daily"
+   }
+  },
+  "FXBRLCAD": {
+   "label": "BRL/CAD",
+   "description": "Daily average exchange rate of the Brazilian real in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Brazilian real",
+    "frequency": "Business daily"
+   }
+  },
+  "FXCNYCAD": {
+   "label": "CNY/CAD",
+   "description": "Daily average exchange rate of the Chinese renminbi in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Chinese renminbi",
+    "frequency": "Business daily"
+   }
+  },
+  "FXEURCAD": {
+   "label": "EUR/CAD",
+   "description": "Daily average exchange rate of the euro in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per euro",
+    "frequency": "Business daily"
+   }
+  },
+  "FXHKDCAD": {
+   "label": "HKD/CAD",
+   "description": "Daily average exchange rate of the Hong Kong dollar in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Hong Kong dollar",
+    "frequency": "Business daily"
+   }
+  },
+  "FXINRCAD": {
+   "label": "INR/CAD",
+   "description": "Daily average exchange rate of the Indian rupee in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Indian rupee",
+    "frequency": "Business daily"
+   }
+  },
+  "FXIDRCAD": {
+   "label": "IDR/CAD",
+   "description": "Daily average exchange rate of the Indonesian rupiah in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Indonesian rupiah",
+    "frequency": "Business daily"
+   }
+  },
+  "FXJPYCAD": {
+   "label": "JPY/CAD",
+   "description": "Daily average exchange rate of the Japanese yen in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Japanese yen",
+    "frequency": "Business daily"
+   }
+  },
+  "FXMYRCAD": {
+   "label": "MYR/CAD",
+   "description": "Daily average exchange rate of the Malaysian ringgit in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Malaysian ringgit",
+    "frequency": "Business daily"
+   }
+  },
+  "FXMXNCAD": {
+   "label": "MXN/CAD",
+   "description": "Daily average exchange rate of the Mexican peso in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Mexican peso",
+    "frequency": "Business daily"
+   }
+  },
+  "FXNZDCAD": {
+   "label": "NZD/CAD",
+   "description": "Daily average exchange rate of the New Zealand dollar in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per New Zealand dollar",
+    "frequency": "Business daily"
+   }
+  },
+  "FXNOKCAD": {
+   "label": "NOK/CAD",
+   "description": "Daily average exchange rate of the Norwegian krone in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Norwegian krone",
+    "frequency": "Business daily"
+   }
+  },
+  "FXPENCAD": {
+   "label": "PEN/CAD",
+   "description": "Daily average exchange rate of the Peruvian new sol in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Peruvian new sol",
+    "frequency": "Business daily"
+   }
+  },
+  "FXPLNCAD": {
+   "label": "PLN/CAD",
+   "description": "Daily average exchange rate of the Polish zloty in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Polish zloty",
+    "frequency": "Business daily"
+   }
+  },
+  "FXRUBCAD": {
+   "label": "RUB/CAD",
+   "description": "Daily average exchange rate \u2014 historical series of the Russian ruble in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Russian ruble",
+    "frequency": "Business daily"
+   }
+  },
+  "FXSARCAD": {
+   "label": "SAR/CAD",
+   "description": "Daily average exchange rate \u2014 historical series of the Saudi riyal in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Saudi riyal",
+    "frequency": "Business daily"
+   }
+  },
+  "FXSGDCAD": {
+   "label": "SGD/CAD",
+   "description": "Daily average exchange rate of the Singapore dollar in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Singapore dollar",
+    "frequency": "Business daily"
+   }
+  },
+  "FXZARCAD": {
+   "label": "ZAR/CAD",
+   "description": "Daily average exchange rate of the South African rand in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per South African rand",
+    "frequency": "Business daily"
+   }
+  },
+  "FXKRWCAD": {
+   "label": "KRW/CAD",
+   "description": "Daily average exchange rate of the South Korean won in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per South Korean won",
+    "frequency": "Business daily"
+   }
+  },
+  "FXSEKCAD": {
+   "label": "SEK/CAD",
+   "description": "Daily average exchange rate of the Swedish krona in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Swedish krona",
+    "frequency": "Business daily"
+   }
+  },
+  "FXCHFCAD": {
+   "label": "CHF/CAD",
+   "description": "Daily average exchange rate of the Swiss franc in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Swiss franc",
+    "frequency": "Business daily"
+   }
+  },
+  "FXTWDCAD": {
+   "label": "TWD/CAD",
+   "description": "Daily average exchange rate of the Taiwanese dollar in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Taiwanese dollar",
+    "frequency": "Business daily"
+   }
+  },
+  "FXTHBCAD": {
+   "label": "THB/CAD",
+   "description": "Daily average exchange rate of the Thai baht in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Thai baht",
+    "frequency": "Business daily"
+   }
+  },
+  "FXTRYCAD": {
+   "label": "TRY/CAD",
+   "description": "Daily average exchange rate of the Turkish lira in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Turkish lira",
+    "frequency": "Business daily"
+   }
+  },
+  "FXGBPCAD": {
+   "label": "GBP/CAD",
+   "description": "Daily average exchange rate of the UK pound sterling in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per UK pound sterling",
+    "frequency": "Business daily"
+   }
+  },
+  "FXUSDCAD": {
+   "label": "USD/CAD",
+   "description": "Daily average exchange rate of the US dollar in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per US dollar",
+    "frequency": "Business daily"
+   }
+  },
+  "FXVNDCAD": {
+   "label": "VND/CAD",
+   "description": "Daily average exchange rate \u2014 historical series of the Vietnamese dong in Canadian dollars.",
+   "dimension": {
+    "key": "d",
+    "name": "Date"
+   },
+   "dateFormat": "daily",
+   "metadata": {
+    "unit": "Canadian dollars per Vietnamese dong",
+    "frequency": "Business daily"
+   }
+  }
+ },
+ "observations": [
+  {
+   "d": "2026-10-30",
+   "FXIDRCAD": {
+    "v": "0.000077"
+   },
+   "FXPENCAD": {
+    "v": "0.4031"
+   },
+   "FXSGDCAD": {
+    "v": "1.0922"
+   },
+   "FXNOKCAD": {
+    "v": "0.1515"
+   },
+   "FXZARCAD": {
+    "v": "0.08355"
+   },
+   "FXNZDCAD": {
+    "v": "0.7865"
+   },
+   "FXKRWCAD": {
+    "v": "0.001046"
+   },
+   "FXMXNCAD": {
+    "v": "0.07414"
+   },
+   "FXSEKCAD": {
+    "v": "0.1420"
+   },
+   "FXMYRCAD": {
+    "v": "0.3441"
+   },
+   "FXCHFCAD": {
+    "v": "1.6947"
+   },
+   "FXJPYCAD": {
+    "v": "0.008870"
+   },
+   "FXTWDCAD": {
+    "v": "0.04280"
+   },
+   "FXTHBCAD": {
+    "v": "0.04135"
+   },
+   "FXINRCAD": {
+    "v": "0.01471"
+   },
+   "FXTRYCAD": {
+    "v": "0.02790"
+   },
+   "FXAUDCAD": {
+    "v": "0.9813"
+   },
+   "FXBRLCAD": {
+    "v": "0.2569"
+   },
+   "FXPLNCAD": {
+    "v": "0.3539"
+   },
+   "FXCNYCAD": {
+    "v": "0.2098"
+   },
+   "FXUSDCAD": {
+    "v": "1.3960"
+   },
+   "FXEURCAD": {
+    "v": "1.5582"
+   },
+   "FXGBPCAD": {
+    "v": "1.8699"
+   },
+   "FXHKDCAD": {
+    "v": "0.1779"
+   }
+  },
+  {
+   "d": "2026-11-02",
+   "FXSEKCAD": {
+    "v": "0.1430"
+   },
+   "FXTRYCAD": {
+    "v": "0.02800"
+   },
+   "FXGBPCAD": {
+    "v": "1.8752"
+   },
+   "FXKRWCAD": {
+    "v": "0.001040"
+   },
+   "FXCHFCAD": {
+    "v": "1.7068"
+   },
+   "FXZARCAD": {
+    "v": "0.08422"
+   },
+   "FXUSDCAD": {
+    "v": "1.3978"
+   },
+   "FXAUDCAD": {
+    "v": "0.9796"
+   },
+   "FXSGDCAD": {
+    "v": "1.0929"
+   },
+   "FXTWDCAD": {
+    "v": "0.04290"
+   },
+   "FXPLNCAD": {
+    "v": "0.3544"
+   },
+   "FXPENCAD": {
+    "v": "0.4038"
+   },
+   "FXTHBCAD": {
+    "v": "0.04146"
+   },
+   "FXINRCAD": {
+    "v": "0.01473"
+   },
+   "FXNOKCAD": {
+    "v": "0.1505"
+   },
+   "FXBRLCAD": {
+    "v": "0.2571"
+   },
+   "FXNZDCAD": {
+    "v": "0.7862"
+   },
+   "FXHKDCAD": {
+    "v": "0.1781"
+   },
+   "FXIDRCAD": {
+    "v": "0.000077"
+   },
+   "FXMXNCAD": {
+    "v": "0.07516"
+   },
+   "FXCNYCAD": {
+    "v": "0.2102"
+   },
+   "FXMYRCAD": {
+    "v": "0.3434"
+   },
+   "FXEURCAD": {
+    "v": "1.5660"
+   },
+   "FXJPYCAD": {
+    "v": "0.008860"
+   }
+  },
+  {
+   "d": "2026-11-03",
+   "FXGBPCAD": {
+    "v": "1.8779"
+   },
+   "FXTHBCAD": {
+    "v": "0.04144"
+   },
+   "FXEURCAD": {
+    "v": "1.5661"
+   },
+   "FXTRYCAD": {
+    "v": "0.02800"
+   },
+   "FXCNYCAD": {
+    "v": "0.2098"
+   },
+   "FXPLNCAD": {
+    "v": "0.3548"
+   },
+   "FXBRLCAD": {
+    "v": "0.2547"
+   },
+   "FXUSDCAD": {
+    "v": "1.3994"
+   },
+   "FXAUDCAD": {
+    "v": "0.9760"
+   },
+   "FXNOKCAD": {
+    "v": "0.1508"
+   },
+   "FXHKDCAD": {
+    "v": "0.1784"
+   },
+   "FXTWDCAD": {
+    "v": "0.04266"
+   },
+   "FXINRCAD": {
+    "v": "0.01477"
+   },
+   "FXCHFCAD": {
+    "v": "1.7056"
+   },
+   "FXIDRCAD": {
+    "v": "0.000077"
+   },
+   "FXSEKCAD": {
+    "v": "0.1429"
+   },
+   "FXJPYCAD": {
+    "v": "0.008830"
+   },
+   "FXKRWCAD": {
+    "v": "0.001041"
+   },
+   "FXMYRCAD": {
+    "v": "0.3432"
+   },
+   "FXZARCAD": {
+    "v": "0.08425"
+   },
+   "FXMXNCAD": {
+    "v": "0.07460"
+   },
+   "FXSGDCAD": {
+    "v": "1.0923"
+   },
+   "FXNZDCAD": {
+    "v": "0.7859"
+   },
+   "FXPENCAD": {
+    "v": "0.4041"
+   }
+  }
+ ]
+}
