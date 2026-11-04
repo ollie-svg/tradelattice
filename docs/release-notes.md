@@ -8,3 +8,4 @@
 - v0.1 validators reject the new record types by design, because the envelope `type` enum is closed.
 - Moved the `api`, `spec` and `connectors` packages under `src/tradelattice/`, so the installed package is `tradelattice`. Module paths are now `tradelattice.api`, `tradelattice.spec` and `tradelattice.connectors` (for example `python -m tradelattice.connectors.cbsa_tariff`, `python -m tradelattice.api.cli`, `uvicorn tradelattice.api.main:app`). Behaviour is unchanged; set `TRADELATTICE_WEB_DIR` to point the API at a different `web/` directory.
 - Added the `boc_fx` connector, which emits `fx_rate` records from the Bank of Canada Valet API (live by default, fetching the last 10 days unless a window is given; bundled sample offline).
+- Added the `cbsa_concordance` connector, which loads CBSA/Finance Canada concordance workbooks (xlsx; 8-digit HS-cycle and yearly 10-digit) as `hs_concordance` records; adds the `openpyxl` dependency.

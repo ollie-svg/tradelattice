@@ -8,6 +8,7 @@ A connector maps one public dataset into spec records. Each lives in `src/tradel
 | `canadabuys` | CanadaBuys open tender notices | `tender` | Bundled CSV | Not implemented |
 | `statcan_trade` | Statistics Canada merchandise trade by HS6 | `price_observation` (unit value = value / quantity) | Bundled CSV | Not implemented |
 | `boc_fx` | Bank of Canada Valet daily exchange rates | `fx_rate` | Bundled JSON | Implemented (default useful path) |
+| `cbsa_concordance` | CBSA / Finance Canada HS concordance workbooks | `hs_concordance` | Bundled xlsx (two files) | Implemented |
 
 ## Run a connector
 
@@ -29,6 +30,20 @@ python -m tradelattice.connectors.boc_fx --out fx.jsonl --live --start 2026-10-2
 Window flags: by default the last 10 calendar days ending today (UTC). `--since` sets the start, `--start` and `--end` set the window explicitly, and `--currencies` filters. The connector always queries a date window, never `recent=N`, which returns stale data.
 
 CBSA valuation uses the BoC rate on the date of direct shipment, so consumers pick the record with `on` <= that date (the latest such one).
+
+## cbsa_concordance
+
+Loads CBSA / Finance Canada concordance workbooks (xlsx) as `hs_concordance` records, one per (from, to) code pair. It accepts any CBSA concordance workbook: the 8-digit HS-cycle tables (`conc-8-finance-2022.xlsx`, old to new) and the yearly 10-digit within-year table (`conc-10-finance-2026.xlsx`, published new to obsolete and flipped to from=obsolete, to=new). The next HS edition is HS 2028, in force 2028-01-01; no HS 2027/2028 table is published yet.
+
+```
+python -m tradelattice.connectors.cbsa_concordance --out conc.jsonl [--live] [--year 2026] [--file conc-10-finance-2026.xlsx] [--from-edition T2021 --to-edition T2022] [--report]
+```
+
+- Without `--live` it reads both bundled workbooks (1,472 + 23 records; editions T2021 to T2022 and T2025 to T2026).
+- `--live` fetches `https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/<year>/menu-eng.html` (default: current UTC year), downloads the linked concordance workbooks and parses them. `--file` restricts to one filename.
+- Editions default to `T<year-1>` to `T<year>` (assumes the January file supersedes the prior year's last edition). A `conc-8` file needs `--from-edition` and `--to-edition`, otherwise `ValueError`.
+- Relations: `same` (equal codes, 1:1), `renumbered` (different codes, 1:1), `split` (source has several targets; wins over `merged` when both apply), `merged` (target has several sources, source has one target). `removed` is never produced: every row has both codes.
+- `observed_at` is `<to_edition year>-01-01T00:00:00Z` (assumed edition start). `--report` prints counts by relation and by Finance change code (SC, WC, ...) to stderr; change codes are not stored in records.
 
 ## Edition tracking
 
