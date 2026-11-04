@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from connectors.cbsa_tariff import EDITION, fetch, records_from_html
-from connectors.cbsa_tariff.parse import parse_chapter_html, parse_preferential
-from spec.validate import validate_record
+from tradelattice.connectors.cbsa_tariff import EDITION, fetch, records_from_html
+from tradelattice.connectors.cbsa_tariff.parse import parse_chapter_html, parse_preferential
+from tradelattice.spec.validate import validate_record
 
 FIXTURE = Path(__file__).parent.parent / "cbsa_tariff" / "fixtures" / "ch09-2026-2.html"
 

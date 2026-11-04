@@ -1,6 +1,6 @@
 """Validate TradeLattice record files against the v0.2 JSON Schemas.
 
-Usage: python -m spec.validate spec/examples/*.json
+Usage: python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json
 Each file may contain a single record or an array of records.
 Exit status is non-zero if any record is invalid or unreadable.
 """
@@ -100,7 +100,7 @@ def validate_record(record: dict) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     if not args:
-        print("usage: python -m spec.validate FILE [FILE...]", file=sys.stderr)
+        print("usage: python -m tradelattice.spec.validate FILE [FILE...]", file=sys.stderr)
         return 2
     failed = False
     for name in args:

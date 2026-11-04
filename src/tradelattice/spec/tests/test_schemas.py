@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from spec.validate import validate_record
+from tradelattice.spec.validate import validate_record
 
 EXAMPLES = sorted((Path(__file__).parent.parent / "examples").glob("*.json"))
 

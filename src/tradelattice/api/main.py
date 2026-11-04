@@ -1,6 +1,7 @@
 """TradeLattice API."""
 from __future__ import annotations
 
+import os
 import re
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -20,7 +21,19 @@ from .store import upsert_records
 from .validation import validate_records
 
 Db = Annotated[Session, Depends(get_session)]
-WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+
+
+def _find_web_dir() -> Path | None:
+    env = os.environ.get("TRADELATTICE_WEB_DIR")
+    if env:
+        return Path(env)
+    for parent in Path(__file__).resolve().parents:
+        if (parent / "pyproject.toml").is_file():
+            return parent / "web"
+    return None
+
+
+WEB_DIR = _find_web_dir()
 
 
 @asynccontextmanager
@@ -146,7 +159,7 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
     )
 
 
-if (WEB_DIR / "index.html").is_file():
+if WEB_DIR is not None and (WEB_DIR / "index.html").is_file():
 
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:
@@ -159,5 +172,5 @@ else:
         return PlainTextResponse("TradeLattice API is running. web/index.html not found.")
 
 
-if WEB_DIR.is_dir():
+if WEB_DIR is not None and WEB_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")

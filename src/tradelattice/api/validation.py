@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from fastapi import HTTPException
 
-from spec.validate import validate_record
+from tradelattice.spec.validate import validate_record
 
 
 def validate_records(records: list) -> None:

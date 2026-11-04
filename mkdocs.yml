@@ -50,6 +50,7 @@ nav:
       - adr/0001-schema-first.md
       - adr/0002-sqlite-default.md
       - adr/0003-connectors-offline-first.md
+      - adr/0004-src-layout.md
   - Contributing:
       - Contributing: contributing.md
       - Deploying the site: deploy.md

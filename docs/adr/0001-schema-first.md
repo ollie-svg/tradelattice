@@ -6,7 +6,7 @@ Status: Accepted
 Adoption depends on others being able to map their data into a shared model quickly. A large app without a stable model gains little network effect.
 
 ## Decision
-The versioned JSON Schema (2020-12) in `spec/` is the primary artifact. Connectors and the API depend on it; it depends on nothing. Records share an envelope and are validated against the schemas on write.
+The versioned JSON Schema (2020-12) in `src/tradelattice/spec/` is the primary artifact. Connectors and the API depend on it; it depends on nothing. Records share an envelope and are validated against the schemas on write.
 
 ## Consequences
 - Anyone can adopt TradeLattice by emitting conformant JSON, in any language.

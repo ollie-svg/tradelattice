@@ -23,7 +23,7 @@ While the version is `0.x`, minor releases may include breaking changes; these a
 
 ```
 pip install -e .[dev]
-python -m spec.validate spec/examples/*.json
+python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json
 ```
 
 A file may hold one record or a JSON array of records. The command exits non-zero if any record fails.

@@ -14,7 +14,7 @@ from collections.abc import Iterable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 
-from connectors._base import (
+from tradelattice.connectors._base import (
     Envelope,
     digits_only,
     envelope,
@@ -22,7 +22,7 @@ from connectors._base import (
     read_csv,
     to_utc_iso,
 )
-from connectors.cbsa_tariff.parse import parse_chapter_html, parse_preferential
+from tradelattice.connectors.cbsa_tariff.parse import parse_chapter_html, parse_preferential
 
 log = logging.getLogger(__name__)
 

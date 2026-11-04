@@ -1,6 +1,6 @@
 import pytest
 
-from api.duty import (
+from tradelattice.api.duty import (
     AdValorem,
     Clamp,
     DutyInputError,

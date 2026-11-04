@@ -7,9 +7,9 @@ os.environ["DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
 import pytest
 from fastapi.testclient import TestClient
 
-from api import cli
-from api.db import Base, engine, init_db
-from api.main import app
+from tradelattice.api import cli
+from tradelattice.api.db import Base, engine, init_db
+from tradelattice.api.main import app
 
 
 @pytest.fixture()

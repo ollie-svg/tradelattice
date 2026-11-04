@@ -15,7 +15,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e .[dev]
       - run: ruff check .
-      - run: python -m spec.validate spec/examples/*.json
+      - run: python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json
       - run: pytest
   docs:
     runs-on: ubuntu-latest

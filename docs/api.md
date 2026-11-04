@@ -52,3 +52,5 @@ curl -X POST http://localhost:8000/landed-cost \
 Returns HTTP 422 when a specific rate needs a quantity or unit that is missing or does not match ("this rate needs a quantity and unit in kg"), and when the rate is `N/A` ("rate not applicable for this treatment").
 
 GST is not calculated in v0.1. Results are indicative only.
+
+The web UI directory defaults to `<repo>/web`, found by walking up from the package to the nearest `pyproject.toml`; set `TRADELATTICE_WEB_DIR` to serve it from elsewhere (an installed copy outside the source tree shows a placeholder at `/` otherwise).

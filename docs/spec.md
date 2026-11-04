@@ -35,13 +35,13 @@ Numeric values in the new types (`pct`, `rate`) are decimal strings. For `hs_con
 
 ## Schema files
 
-- [envelope.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/envelope.schema.json)
-- [product.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/product.schema.json)
-- [tariff_line.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/tariff_line.schema.json)
-- [supplier.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/supplier.schema.json)
-- [tender.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/tender.schema.json)
-- [shipment.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/shipment.schema.json)
-- [price_observation.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/price_observation.schema.json)
-- [surtax_order.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/surtax_order.schema.json)
-- [fx_rate.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/fx_rate.schema.json)
-- [hs_concordance.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/spec/schemas/hs_concordance.schema.json)
+- [envelope.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/envelope.schema.json)
+- [product.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/product.schema.json)
+- [tariff_line.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/tariff_line.schema.json)
+- [supplier.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/supplier.schema.json)
+- [tender.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/tender.schema.json)
+- [shipment.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/shipment.schema.json)
+- [price_observation.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/price_observation.schema.json)
+- [surtax_order.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/surtax_order.schema.json)
+- [fx_rate.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/fx_rate.schema.json)
+- [hs_concordance.schema.json](https://github.com/ollie-svg/tradelattice/blob/main/src/tradelattice/spec/schemas/hs_concordance.schema.json)

@@ -1,6 +1,6 @@
 # connectors
 
-Offline-first data connectors (ADR 0003). Each emits Envelope records validating against `spec/schemas`.
+Offline-first data connectors (ADR 0003). Each emits Envelope records validating against `src/tradelattice/spec/schemas`.
 
 | Connector | Output | Sample |
 |---|---|---|
@@ -9,7 +9,7 @@ Offline-first data connectors (ADR 0003). Each emits Envelope records validating
 | `statcan_trade` | `price_observation` | `statcan_trade/sample/cimt_imports_sample.csv` |
 
 ```
-python -m connectors.<name> --out records.jsonl [--since 2026-02-01] [--live]
+python -m tradelattice.connectors.<name> --out records.jsonl [--since 2026-02-01] [--live]
 ```
 
 `--live` raises `NotImplementedError` for all connectors except `cbsa_tariff`. Live sources:

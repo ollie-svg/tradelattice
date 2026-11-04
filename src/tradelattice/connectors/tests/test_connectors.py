@@ -3,13 +3,13 @@ import json
 
 import pytest
 
-from spec.validate import validate_record
+from tradelattice.spec.validate import validate_record
 
 NAMES = ["cbsa_tariff", "canadabuys", "statcan_trade"]
 
 
 def _fetch(name, **kw):
-    return list(importlib.import_module(f"connectors.{name}").fetch(**kw))
+    return list(importlib.import_module(f"tradelattice.connectors.{name}").fetch(**kw))
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -35,9 +35,9 @@ def test_statcan_skips_zero_quantity():
 
 @pytest.mark.parametrize("name", NAMES)
 def test_cli_writes_jsonl(name, tmp_path):
-    from connectors import _base
+    from tradelattice.connectors import _base
     out = tmp_path / "o.jsonl"
-    mod = importlib.import_module(f"connectors.{name}")
+    mod = importlib.import_module(f"tradelattice.connectors.{name}")
     assert _base.run_cli(name, mod.fetch, ["--out", str(out)]) == 0
     lines = out.read_text().splitlines()
     assert len(lines) >= 10 and json.loads(lines[0])["source"] == name

@@ -7,16 +7,16 @@
 ## Layers
 
 ```
-spec/        Canonical data model: JSON Schema 2020-12, versioned. Country-agnostic.
-connectors/  Ingestors that map public datasets → spec records. Each is a plugin: `connectors/<name>/`.
-api/         FastAPI service. Stores records (SQLite default, Postgres via DATABASE_URL). REST + OpenAPI.
+src/tradelattice/spec/        Canonical data model: JSON Schema 2020-12, versioned. Country-agnostic.
+src/tradelattice/connectors/  Ingestors that map public datasets → spec records. Each is a plugin: `src/tradelattice/connectors/<name>/`.
+src/tradelattice/api/         FastAPI service. Stores records (SQLite default, Postgres via DATABASE_URL). REST + OpenAPI.
 web/         Static single-page UI (vanilla JS + HTMX-free fetch). Served by the API at `/`.
 docs/        Architecture, ADRs, governance, contribution guide.
 ```
 
 Dependency direction: `web → api → spec ← connectors`. Nothing imports upward.
 
-## Canonical data model (spec/schemas, v0.1)
+## Canonical data model (src/tradelattice/spec/schemas, v0.2)
 
 All records share an `Envelope`:
 - `id` (string, URI-safe, globally unique: `<source>:<native_id>`)
@@ -34,11 +34,11 @@ Types:
 5. **Shipment** — `reference`, `mode` (`road|rail|air|sea|multimodal`), `origin`, `destination` (both `{country, region?, city?, port_code?}`), `line_items` (array of `{hs_code, quantity, unit, declared_value: {amount, currency}}`), `eta`, `status`.
 6. **PriceObservation** — `subject` (`{type: "product"|"service", hs_code?, unspsc?, description}`), `price` (`{amount, currency, per_unit}`), `observed_at`, `location` (`{country, region?, city?}`), `source_url`.
 
-Each type has its own file `spec/schemas/<type>.schema.json` plus `spec/schemas/envelope.schema.json`. `spec/examples/<type>.json` holds one valid example each. `spec/README.md` explains versioning (semver; breaking = major).
+Each type has its own file `src/tradelattice/spec/schemas/<type>.schema.json` plus `src/tradelattice/spec/schemas/envelope.schema.json`. `src/tradelattice/spec/examples/<type>.json` holds one valid example each. `src/tradelattice/spec/README.md` explains versioning (semver; breaking = major).
 
 ## Connectors (v0.1)
 
-Each connector is a Python package under `connectors/<name>/` exposing `fetch(since: datetime | None) -> Iterator[dict]` returning Envelope-shaped dicts, and a CLI entry `python -m connectors.<name> --out records.jsonl`. Connectors **must** work offline from a bundled sample file (`connectors/<name>/sample/`) so tests never hit the network; live fetch is opt-in via `--live`.
+Each connector is a Python package under `src/tradelattice/connectors/<name>/` exposing `fetch(since: datetime | None) -> Iterator[dict]` returning Envelope-shaped dicts, and a CLI entry `python -m tradelattice.connectors.<name> --out records.jsonl`. Connectors **must** work offline from a bundled sample file (`src/tradelattice/connectors/<name>/sample/`) so tests never hit the network; live fetch is opt-in via `--live`.
 
 1. `cbsa_tariff` — Canada Customs Tariff schedule (CBSA publishes CSV/XLSX of the tariff schedule with MFN and preferential rates) → `TariffLine`.
 2. `canadabuys` — CanadaBuys open tender notices CSV (open.canada.ca) → `Tender`.
@@ -59,7 +59,7 @@ Endpoints:
 - `POST /landed-cost` body `{hs_code, origin_country, declared_value: {amount, currency}, treatment?: string}` → `{duty_rate, duty, total}` using the matched TariffLine; GST is **not** computed (documented as out of scope v0.1).
 - `GET /` serves `web/index.html`; `/static/*` serves `web/`.
 
-`api/cli.py`: `python -m api.cli load records.jsonl` bulk-loads connector output.
+`src/tradelattice/api/cli.py`: `python -m tradelattice.api.cli load records.jsonl` bulk-loads connector output.
 
 Tests: pytest, TestClient, in-memory SQLite; cover each endpoint and landed-cost prefix matching.
 

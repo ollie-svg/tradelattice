@@ -69,7 +69,7 @@ def write_jsonl(records: Iterable[Envelope], out: Path) -> int:
 
 
 def run_cli(name: str, fetch: Callable[..., Iterator[Envelope]], argv: list[str] | None) -> int:
-    parser = argparse.ArgumentParser(prog=f"python -m connectors.{name}")
+    parser = argparse.ArgumentParser(prog=f"python -m tradelattice.connectors.{name}")
     parser.add_argument("--out", required=True, type=Path, help="output JSONL file")
     parser.add_argument("--live", action="store_true", help="fetch live data (opt-in)")
     parser.add_argument("--since", type=datetime.fromisoformat, default=None,

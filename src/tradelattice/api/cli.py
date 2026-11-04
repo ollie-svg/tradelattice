@@ -1,4 +1,4 @@
-"""CLI: python -m api.cli load FILE.jsonl"""
+"""CLI: python -m tradelattice.api.cli load FILE.jsonl"""
 from __future__ import annotations
 
 import argparse
@@ -12,7 +12,7 @@ BATCH = 500
 
 
 def load(path: str) -> tuple[int, int]:
-    from spec.validate import validate_record
+    from tradelattice.spec.validate import validate_record
 
     init_db()
     loaded = invalid = 0
@@ -49,7 +49,7 @@ def load(path: str) -> tuple[int, int]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="python -m api.cli")
+    p = argparse.ArgumentParser(prog="python -m tradelattice.api.cli")
     sub = p.add_subparsers(dest="cmd", required=True)
     lp = sub.add_parser("load", help="upsert records from a JSONL file")
     lp.add_argument("file")

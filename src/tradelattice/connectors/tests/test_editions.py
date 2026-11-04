@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from connectors.cbsa_tariff import editions as ed
+from tradelattice.connectors.cbsa_tariff import editions as ed
 
 FIXTURE = Path(__file__).parent.parent / "cbsa_tariff" / "fixtures" / "menu-2026.html"
 
@@ -74,7 +74,7 @@ def test_chapter_urls_follow_index_not_revision():
     """T2026-1 changed one chapter; its index points the other 98 at revision 00."""
     from pathlib import Path
 
-    from connectors.cbsa_tariff import chapter_urls, index_url
+    from tradelattice.connectors.cbsa_tariff import chapter_urls, index_url
 
     ed = {"name": "T2026-1", "revision": "01", "effective_from": "2026-08-06"}
     assert index_url(ed).endswith("/2026/html/tblmod-1-eng.html")

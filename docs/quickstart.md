@@ -54,6 +54,6 @@ Write one JSON record per line (JSONL). Each record must match the [Envelope](sp
 Validate your file, then load it:
 
 ```
-python -m spec.validate spec/examples/*.json
-python -m api.cli load my-records.jsonl
+python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json
+python -m tradelattice.api.cli load my-records.jsonl
 ```

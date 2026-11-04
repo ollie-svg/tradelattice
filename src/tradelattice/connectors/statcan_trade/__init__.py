@@ -9,7 +9,7 @@ from collections.abc import Iterator
 from datetime import date, datetime
 from pathlib import Path
 
-from connectors._base import (
+from tradelattice.connectors._base import (
     Envelope,
     digits_only,
     envelope,

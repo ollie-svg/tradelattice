@@ -6,3 +6,4 @@
 - Added optional `edition` (pattern `^T\d{4}(-\d+)?$`) to `tariff_line`.
 - Bumped every schema `$id` from `/schemas/v0.1/` to `/schemas/v0.2/`.
 - v0.1 validators reject the new record types by design, because the envelope `type` enum is closed.
+- Moved the `api`, `spec` and `connectors` packages under `src/tradelattice/`, so the installed package is `tradelattice`. Module paths are now `tradelattice.api`, `tradelattice.spec` and `tradelattice.connectors` (for example `python -m tradelattice.connectors.cbsa_tariff`, `python -m tradelattice.api.cli`, `uvicorn tradelattice.api.main:app`). Behaviour is unchanged; set `TRADELATTICE_WEB_DIR` to point the API at a different `web/` directory.

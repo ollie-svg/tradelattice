@@ -12,9 +12,9 @@ python -m webbrowser http://localhost:8000
 make test
 ```
 
-(Connectors, API and web UI are built in `connectors/`, `api/` and `web/`; see the Makefile for exact commands.)
+(Connectors, API and web UI are built in `src/tradelattice/connectors/`, `src/tradelattice/api/` and `web/`; see the Makefile for exact commands.)
 
-Validate the spec examples: `python -m spec.validate spec/examples/*.json`
+Validate the spec examples: `python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json`
 
 ## Learn more
 

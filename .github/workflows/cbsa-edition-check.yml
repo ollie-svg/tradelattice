@@ -21,7 +21,7 @@ jobs:
         id: check
         run: |
           set +e
-          python -m connectors.cbsa_tariff check --state data/cbsa_edition.json | tee check.txt
+          python -m tradelattice.connectors.cbsa_tariff check --state data/cbsa_edition.json | tee check.txt
           code=${PIPESTATUS[0]}
           echo "code=$code" >> "$GITHUB_OUTPUT"
           if [ "$code" != "0" ] && [ "$code" != "10" ]; then exit "$code"; fi
@@ -36,7 +36,7 @@ jobs:
           NEW_DATE=$(python -c "import json;print(json.load(open('data/cbsa_edition.json'))['effective_from'])")
           OLD_NAME=$(python -c "
           import sys
-          from connectors.cbsa_tariff import editions as e
+          from tradelattice.connectors.cbsa_tariff import editions as e
           eds = e.list_editions(int('$NEW_NAME'[1:5]))
           names = [x['name'] for x in eds]
           i = names.index('$NEW_NAME')
@@ -46,9 +46,9 @@ jobs:
             echo "No previous revision in the same year; diff skipped. Run: $RUN_URL" > report.md
           else
             T="$RUNNER_TEMP"
-            python -m connectors.cbsa_tariff --live --edition "$NEW_NAME" --out "$T/new.jsonl" \
-              && python -m connectors.cbsa_tariff --live --edition "$OLD_NAME" --out "$T/old.jsonl" \
-              && python -m connectors.cbsa_tariff diff "$T/old.jsonl" "$T/new.jsonl" --markdown \
+            python -m tradelattice.connectors.cbsa_tariff --live --edition "$NEW_NAME" --out "$T/new.jsonl" \
+              && python -m tradelattice.connectors.cbsa_tariff --live --edition "$OLD_NAME" --out "$T/old.jsonl" \
+              && python -m tradelattice.connectors.cbsa_tariff diff "$T/old.jsonl" "$T/new.jsonl" --markdown \
                    --old-name "$OLD_NAME" --new-name "$NEW_NAME" > report.md
             if [ $? -ne 0 ]; then
               echo "Edition diff failed; see workflow run: $RUN_URL" > report.md

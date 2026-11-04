@@ -4,16 +4,16 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from connectors import _base
-from connectors.cbsa_tariff import NAME, fetch
-from connectors.cbsa_tariff import editions as ed
+from tradelattice.connectors import _base
+from tradelattice.connectors.cbsa_tariff import NAME, fetch
+from tradelattice.connectors.cbsa_tariff import editions as ed
 
 SUBCOMMANDS = {"editions", "check", "diff"}
 EXIT_NEW_EDITION = 10
 
 
 def _fetch_main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(prog=f"python -m connectors.{NAME}")
+    parser = argparse.ArgumentParser(prog=f"python -m tradelattice.connectors.{NAME}")
     parser.add_argument("--out", required=True, type=Path, help="output JSONL file")
     parser.add_argument("--live", action="store_true", help="fetch live data (opt-in)")
     parser.add_argument("--since", type=datetime.fromisoformat, default=None,
@@ -58,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv or argv[0] not in SUBCOMMANDS:
         return _fetch_main(argv)
-    parser = argparse.ArgumentParser(prog=f"python -m connectors.{NAME}")
+    parser = argparse.ArgumentParser(prog=f"python -m tradelattice.connectors.{NAME}")
     sub = parser.add_subparsers(dest="cmd", required=True)
     p_ed = sub.add_parser("editions", help="list editions for a year as JSON")
     p_ed.add_argument("--year", type=int, default=datetime.now(UTC).year)
