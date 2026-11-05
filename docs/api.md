@@ -27,7 +27,23 @@ FTA tri-state: a `surtax_order` with `exempt_if: "fta_qualified"` is skipped whe
 
 ## Landed cost
 
-`POST /landed-cost` returns the landed cost in CAD. In order: the declared value is converted to CAD at the Bank of Canada rate for the shipment date, duty is evaluated on that CAD value, and any origin surtax is added.
+`POST /landed-cost` returns the landed cost in CAD. The computation is a pure function, `tradelattice.api.landed.compute(request, records, jurisdiction, today)`, over the records the route loads from the database (ADR 0005); the route only loads records and maps the two refusal exceptions below to HTTP. Consumers may call `compute()` directly on their own record set, or run their own implementation against `tests/golden/landed_cost.jsonl`.
+
+### Refusals and reason codes
+
+A 409 means the goods may not be entered (`prohibited: true`, see Jurisdictions above). Every other non-2xx body is `{"detail": <message>, "reason": <code>}` with one of these stable codes:
+
+| Status | `reason` | When |
+| --- | --- | --- |
+| 404 | `tariff_not_found` | no `tariff_line` of the jurisdiction prefixes the HS code |
+| 404 | `rate_not_found` | the matched line has no rate for the treatment |
+| 422 | `invalid_request` | `hs_code`, `origin_country` or `shipment_date` is malformed |
+| 422 | `fx_missing` | no `fx_rate` into the jurisdiction's currency on or before the shipment date |
+| 422 | `rate_not_applicable` | the rate cannot be evaluated from the inputs (a specific rate with no quantity, a not-applicable treatment) |
+| 422 | `surtax_content_basis` | an applicable `surtax_order` has a `basis` other than `value`; the request carries no content value and the rate is never applied to the full value |
+| 501 | `jurisdiction_no_data` | the jurisdiction is registered but has no `tariff_line` records loaded (today: `US`) |
+
+`unknown jurisdiction 'XX'` (422) is raised by the route before any computation and carries no code. Records are scoped by their envelope `jurisdiction`: a `surtax_order` or `tariff_line` filed under another jurisdiction is ignored. In order: the declared value is converted to CAD at the Bank of Canada rate for the shipment date, duty is evaluated on that CAD value, and any origin surtax is added.
 
 Request fields: `hs_code`, `origin_country` (2 letters, case-insensitive), `declared_value` (`amount`, `currency`), optional `treatment` (default `MFN`), optional `quantity` and `unit` for specific rates, and optional `shipment_date` (ISO date, default today UTC).
 
