@@ -17,8 +17,8 @@ def load(name: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def test_nine_examples_exist():
-    assert len(EXAMPLES) == 9
+def test_eleven_examples_exist():
+    assert len(EXAMPLES) == 11
 
 
 @pytest.mark.parametrize("path", EXAMPLES, ids=lambda p: p.stem)
@@ -77,3 +77,55 @@ def test_surtax_order_requires_effective_to():
     rec = load("surtax_order")
     del rec["attributes"]["effective_to"]
     assert validate_record(rec)
+
+
+def test_v02_shaped_surtax_order_validates():
+    rec = load("surtax_order")
+    for k in ("authority", "basis", "stacking", "last_verified"):
+        del rec["attributes"][k]
+    assert validate_record(rec) == []
+
+
+def test_surtax_bad_basis_rejected():
+    rec = load("surtax_order")
+    rec["attributes"]["basis"] = "weight"
+    assert validate_record(rec)
+
+
+def test_surtax_bad_exempt_if_rejected():
+    rec = load("surtax_order")
+    rec["attributes"]["exempt_if"] = "origin"
+    assert validate_record(rec)
+
+
+def test_surtax_effective_to_before_from_fails_semantic_check():
+    rec = load("surtax_order")
+    rec["attributes"]["effective_to"] = "2026-01-01"
+    errors = validate_record(rec)
+    assert any("must not be before effective_from" in e for e in errors)
+
+
+def test_prohibition_effective_to_before_from_fails_semantic_check():
+    rec = load("prohibition")
+    rec["attributes"]["effective_to"] = "2026-09-28"
+    errors = validate_record(rec)
+    assert len(errors) == 1
+    assert "effective_to" in errors[0] and "must not be before effective_from" in errors[0]
+
+
+def test_prohibition_effective_to_equal_from_ok():
+    rec = load("prohibition")
+    rec["attributes"]["effective_to"] = rec["attributes"]["effective_from"]
+    assert validate_record(rec) == []
+
+
+def test_prohibition_with_pct_rejected():
+    rec = load("prohibition")
+    rec["attributes"]["pct"] = "25"
+    assert validate_record(rec)
+
+
+def test_envelope_accepts_prohibition_type():
+    rec = load("prohibition")
+    assert rec["type"] == "prohibition"
+    assert validate_record(rec) == []

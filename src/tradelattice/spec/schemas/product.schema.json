@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tradelattice.dev/schemas/v0.2/product.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.3/product.schema.json",
   "title": "Product",
   "allOf": [
-    {"$ref": "https://tradelattice.dev/schemas/v0.2/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.3/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "product"},

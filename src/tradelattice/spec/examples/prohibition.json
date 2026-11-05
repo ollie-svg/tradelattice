@@ -1,0 +1,16 @@
+{
+  "id": "us_prohibitions:2026-09-29:0401:CA",
+  "type": "prohibition",
+  "source": "us_prohibitions",
+  "observed_at": "2026-11-05T00:00:00Z",
+  "jurisdiction": "US",
+  "attributes": {
+    "hs_prefix": "0401",
+    "origin_country": "CA",
+    "list_id": "us-import-ban-2026-09-29",
+    "authority": "presidential-proclamation",
+    "effective_from": "2026-09-29",
+    "effective_to": null,
+    "source_url": "https://www.blakes.com/insights/us-canada-tariffs-timeline-of-key-dates-and-documents/"
+  }
+}

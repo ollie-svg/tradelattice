@@ -1,0 +1,20 @@
+{
+  "id": "us_232:us-232-steel-2026-06-08:7208:CA",
+  "type": "surtax_order",
+  "source": "us_232",
+  "observed_at": "2026-11-05T00:00:00Z",
+  "jurisdiction": "US",
+  "attributes": {
+    "hs_prefix": "7208",
+    "origin_country": "CA",
+    "pct": "25",
+    "list_id": "us-232-steel-2026-06-08",
+    "authority": "232",
+    "basis": "non_fta_content_value",
+    "stacking": "additive",
+    "effective_from": "2026-06-08",
+    "effective_to": null,
+    "last_verified": "2026-11-05",
+    "source_url": "https://www.blakes.com/insights/us-canada-tariffs-timeline-of-key-dates-and-documents/"
+  }
+}

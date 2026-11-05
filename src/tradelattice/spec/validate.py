@@ -1,4 +1,4 @@
-"""Validate TradeLattice record files against the v0.2 JSON Schemas.
+"""Validate TradeLattice record files against the v0.3 JSON Schemas.
 
 Usage: python -m tradelattice.spec.validate src/tradelattice/spec/examples/*.json
 Each file may contain a single record or an array of records.
@@ -77,6 +77,28 @@ def validator_for_type(record_type: str) -> Draft202012Validator:
     )
 
 
+def semantic_checks(record: dict) -> list[str]:
+    """Checks JSON Schema cannot express. Applied to prohibition and surtax_order records."""
+    if record.get("type") not in ("prohibition", "surtax_order"):
+        return []
+    attrs = record.get("attributes")
+    if not isinstance(attrs, dict):
+        return []
+    start, end = attrs.get("effective_from"), attrs.get("effective_to")
+    if isinstance(start, str) and isinstance(end, str):
+        try:
+            if date.fromisoformat(end) < date.fromisoformat(start):
+                return [
+                    (
+                        f"attributes/effective_to: {end} is before effective_from {start}; "
+                        "effective_to, when set, must not be before effective_from"
+                    )
+                ]
+        except ValueError:
+            return []  # malformed dates are reported by the schema format check
+    return []
+
+
 def validate_record(record: dict) -> list[str]:
     """Return a list of error messages (empty if valid)."""
     if not isinstance(record, dict):
@@ -91,10 +113,11 @@ def validate_record(record: dict) -> list[str]:
         validator = Draft202012Validator(
             schemas["envelope"], registry=registry, format_checker=FORMAT_CHECKER
         )
-    return [
+    errors = [
         f"{'/'.join(map(str, e.absolute_path)) or '<root>'}: {e.message}"
         for e in sorted(validator.iter_errors(record), key=lambda e: list(map(str, e.absolute_path)))
     ]
+    return errors + semantic_checks(record)
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tradelattice.dev/schemas/v0.3/prohibition.schema.json",
+  "title": "Prohibition",
+  "description": "An import prohibition: goods of a given origin whose tariff code starts with hs_prefix may not be entered in the jurisdiction for the date range. A prohibition is a state, not a rate; consumers must refuse to compute a landed cost, never return a number. Semantic rule (not expressible in JSON Schema, enforced by tradelattice.spec.validate): when effective_to is a string it must not be before effective_from.",
+  "allOf": [
+    {"$ref": "https://tradelattice.dev/schemas/v0.3/envelope.schema.json"},
+    {
+      "properties": {
+        "type": {"const": "prohibition"},
+        "attributes": {
+          "type": "object",
+          "required": ["hs_prefix", "origin_country", "list_id", "effective_from", "effective_to"],
+          "additionalProperties": false,
+          "properties": {
+            "hs_prefix": {"type": "string", "pattern": "^[0-9]{2,10}$"},
+            "origin_country": {"type": "string", "pattern": "^[A-Z]{2}$"},
+            "list_id": {"type": "string", "minLength": 1},
+            "effective_from": {"type": "string", "format": "date"},
+            "effective_to": {"type": ["string", "null"], "format": "date", "description": "Null when open-ended. When a string, must not be before effective_from (semantic rule)."},
+            "authority": {"type": "string"},
+            "source_url": {"type": "string", "format": "uri"}
+          }
+        }
+      }
+    }
+  ]
+}

@@ -16,7 +16,7 @@ docs/        Architecture, ADRs, governance, contribution guide.
 
 Dependency direction: `web → api → spec ← connectors`. Nothing imports upward.
 
-## Canonical data model (src/tradelattice/spec/schemas, v0.2)
+## Canonical data model (src/tradelattice/spec/schemas, v0.3)
 
 All records share an `Envelope`:
 - `id` (string, URI-safe, globally unique: `<source>:<native_id>`)

@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tradelattice.dev/schemas/v0.2/fx_rate.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.3/fx_rate.schema.json",
   "title": "FxRate",
   "description": "An exchange rate: multiply an amount in currency by rate to get an amount in to. CAD is the Canadian convention for to, but it is not enforced.",
   "allOf": [
-    {"$ref": "https://tradelattice.dev/schemas/v0.2/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.3/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "fx_rate"},

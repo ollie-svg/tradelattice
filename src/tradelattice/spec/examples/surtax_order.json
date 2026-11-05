@@ -10,6 +10,10 @@
     "pct": "25",
     "list_id": "example-surtax-2026",
     "effective_from": "2026-09-08",
-    "effective_to": null
+    "effective_to": null,
+    "authority": "s53",
+    "basis": "value",
+    "stacking": "additive",
+    "last_verified": "2026-11-04"
   }
 }

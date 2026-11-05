@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tradelattice.dev/schemas/v0.2/hs_concordance.schema.json",
+  "$id": "https://tradelattice.dev/schemas/v0.3/hs_concordance.schema.json",
   "title": "HsConcordance",
   "description": "A mapping of one tariff code between two tariff editions. A split is one record per target with relation split; a merge is one record per source with relation merged. to_code is null only when relation is removed.",
   "allOf": [
-    {"$ref": "https://tradelattice.dev/schemas/v0.2/envelope.schema.json"},
+    {"$ref": "https://tradelattice.dev/schemas/v0.3/envelope.schema.json"},
     {
       "properties": {
         "type": {"const": "hs_concordance"},

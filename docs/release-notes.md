@@ -1,5 +1,13 @@
 # Release notes
 
+## v0.3 (2026-11-05)
+
+- Added record type `prohibition` (an import prohibition by origin and tariff-code prefix and date range), and added it to the envelope `type` enum.
+- Added optional `surtax_order` attributes `authority`, `basis`, `exempt_if`, `exclusion_ref`, `case_number`, `stacking` and `last_verified`. The `required` list is unchanged, so v0.2 records validate unchanged.
+- Added a post-schema semantic check in `tradelattice.spec.validate`: for `prohibition` and `surtax_order`, `effective_to`, when set, must not be before `effective_from`.
+- Added examples `prohibition.json` and `surtax_order_us232.json`; extended `surtax_order.json`.
+- Bumped every schema `$id` from `/schemas/v0.2/` to `/schemas/v0.3/`.
+
 ## v0.2 (2026-11-03)
 
 - Added record types `surtax_order`, `fx_rate` and `hs_concordance`, and added them to the envelope `type` enum.
