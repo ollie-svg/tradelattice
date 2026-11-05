@@ -35,14 +35,16 @@ All six required fields appear on every record.
 Version 0.3 added the `prohibition` type and the optional `surtax_order` fields below. All are optional and existing v0.2 records validate unchanged.
 
 - `authority`: legal authority for the measure. Known values `s53`, `232`, `301`, `338`, `122`, `201`, `adcvd`; not an enum, so other values are allowed.
-- `basis`: what the percentage applies to: `value`, `non_fta_content_value`, `steel_content_value` or `aluminum_content_value`. Default `value`.
+- `basis`: what the percentage applies to: `value`, `non_fta_content_value`, `steel_content_value` or `aluminum_content_value`. Default `value`. Any other value needs a content value the landed-cost request does not yet carry; a consumer without it must refuse (422 `surtax_content_basis`), never apply the rate to the full value.
 - `exempt_if`: condition that exempts goods from the surtax; currently only `fta_qualified`.
 - `exclusion_ref`: reference to an exclusion or remission instrument.
 - `case_number`: case number, for example an antidumping or countervailing duty case.
-- `stacking`: `additive` or `exclusive`. Default `additive`.
+- `stacking`: `additive` or `exclusive`. Declared, not computed; absent means unspecified. A consumer that does not implement stacking must refuse when more than one order applies to a line (422 `surtax_ambiguous`), never pick one.
 - `last_verified`: date the record was last checked against its source.
 
 `prohibition` also accepts optional `authority` (string) and `source_url` (URI).
+
+Date windows, spec-wide: `effective_to` is **exclusive**. A measure with `effective_to` = D is not in force on D; null means open-ended. A source that states an inclusive end date ("until and including Nov 1") is normalised by its connector to the day after, and the connector's docstring says which form it received. This holds for `tariff_line`, `surtax_order`, `prohibition` and every future type with a date window.
 
 Semantic rule: for `prohibition` and `surtax_order`, `effective_to`, when not null, must not be before `effective_from`. JSON Schema cannot compare dates, so `tradelattice.spec.validate` enforces this after schema validation (`semantic_checks`).
 

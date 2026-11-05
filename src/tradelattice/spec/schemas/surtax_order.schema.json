@@ -50,7 +50,8 @@
                 "string",
                 "null"
               ],
-              "format": "date"
+              "format": "date",
+              "description": "Exclusive: a measure with effective_to = D is not in force on D. Null means open-ended. A source that states an inclusive end date is normalised by its connector to the day after. When a string, must not be before effective_from (semantic rule)."
             },
             "source_url": {
               "type": "string",
@@ -68,7 +69,7 @@
                 "aluminum_content_value"
               ],
               "default": "value",
-              "description": "What the percentage applies to. Defaults to value when absent."
+              "description": "What the percentage applies to. Defaults to value when absent. Values other than value require a content value that the landed-cost request does not yet carry: a consumer that lacks it must refuse to compute (TradeLattice returns 422 surtax_content_basis), never apply the rate to the full value."
             },
             "exempt_if": {
               "enum": [
@@ -87,8 +88,7 @@
                 "additive",
                 "exclusive"
               ],
-              "default": "additive",
-              "description": "Whether this surtax adds to others or excludes them. Defaults to additive when absent."
+              "description": "Declared, not computed. Whether this surtax adds to other orders that apply to the same goods (additive) or excludes them (exclusive). Absent means unspecified. A consumer that does not implement stacking must refuse to compute when more than one order applies to a line (TradeLattice returns 422 surtax_ambiguous), never pick one."
             },
             "last_verified": {
               "type": "string",
