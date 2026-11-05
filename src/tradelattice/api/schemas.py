@@ -35,7 +35,16 @@ class LandedCostIn(BaseModel):
     shipment_date: str | None = None
     jurisdiction: str = "CA"
     fta_qualified: bool | None = None
-    mode: Literal["road", "rail", "air", "sea", "multimodal"] | None = None  # unused until chunk 2
+    mode: Literal["road", "rail", "air", "sea", "multimodal"] | None = None
+    include_taxes: bool = False
+
+
+class FeeLine(BaseModel):
+    name: str
+    authority: str
+    base: str
+    base_amount: float
+    amount: float
 
 
 class LandedCostOut(BaseModel):
@@ -61,3 +70,6 @@ class LandedCostOut(BaseModel):
     fta_qualified: bool | None = None
     surtax_if_fta_qualified: float | None = None
     total_if_fta_qualified: float | None = None
+    fees: list[FeeLine] = []
+    taxes: list[FeeLine] = []
+    include_taxes: bool = False

@@ -5,6 +5,7 @@ import os
 import re
 from contextlib import asynccontextmanager
 from datetime import UTC, date, datetime
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from tradelattice.connectors.cbsa_surtax import applicable
 
+from . import fees as feemod
 from . import jurisdictions
 from .db import get_session, init_db
 from .duty import DutyInputError, NotApplicable, basis, evaluate, parse_duty
@@ -150,7 +152,7 @@ def _fx_for(session: Session, currency: str, on: str) -> tuple[str, str]:
 def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut | JSONResponse:
     jcode = body.jurisdiction.strip().upper()
     try:
-        jurisdictions.get(jcode)
+        jur = jurisdictions.get(jcode)
     except KeyError as e:
         raise HTTPException(422, f"unknown jurisdiction {jcode!r}") from e
     if jcode == "US":
@@ -231,13 +233,36 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut | JSONResponse
     surtax = round(raw_surtax, 2)
     vcad = round(value_cad, 2)
     pct = round(duty / value_cad * 100, 2) if value_cad else 0.0
+
+    def dec(x: float) -> Decimal:
+        return Decimal(repr(round(x, 6)))  # strip float noise before Decimal arithmetic
+
+    def cascade(sur: float) -> tuple[list[feemod.Line], list[feemod.Line], float]:
+        ctx = {"value": dec(value_cad), "duty": dec(raw_duty), "surtax": dec(sur)}
+        fl, tl = feemod.run(jur.fee_schedule, ctx, ship, body.mode, body.include_taxes)
+        grand = dec(value_cad + raw_duty + sur) + sum((x.amount for x in fl + tl), Decimal(0))
+        return fl, tl, grand
+
+    fee_lines, tax_lines, grand = cascade(raw_surtax)
+    if fee_lines or tax_lines:
+        total = float(grand.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    else:
+        total = round(value_cad + raw_duty + raw_surtax, 2)
+    total_alt: float | None = None
+    if raw_alt is not None:
+        fa, ta, grand_alt = cascade(raw_alt)
+        if fa or ta:
+            total_alt = float(grand_alt.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+        else:
+            total_alt = round(value_cad + raw_duty + raw_alt, 2)
+    fee_components = [feemod.describe(x) for x in fee_lines + tax_lines]
     return LandedCostOut(
         hs_code=hs,
         matched_hs_code=str(line.attributes["hs_code"]),
         treatment=treatment,
         duty_rate=pct,
         duty=duty,
-        total=round(value_cad + raw_duty + raw_surtax, 2),
+        total=total,
         currency="CAD",
         declared_currency=cur,
         value_cad=vcad,
@@ -248,13 +273,15 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut | JSONResponse
         surtax_list_id=surtax_list,
         shipment_date=ship,
         rate=rate_str,
-        components=fx_lines + components + sur_lines,
+        components=fx_lines + components + sur_lines + fee_components,
         basis=basis(node),
         jurisdiction=jcode,
         fta_qualified=fta,
         surtax_if_fta_qualified=None if raw_alt is None else round(raw_alt, 2),
-        total_if_fta_qualified=(
-            None if raw_alt is None else round(value_cad + raw_duty + raw_alt, 2)),
+        total_if_fta_qualified=total_alt,
+        fees=[feemod.to_dict(x) for x in fee_lines],
+        taxes=[feemod.to_dict(x) for x in tax_lines],
+        include_taxes=body.include_taxes,
     )
 
 

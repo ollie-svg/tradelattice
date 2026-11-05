@@ -3,6 +3,7 @@
 ## Unreleased
 
 - `/landed-cost` gains a `jurisdiction` switch (`CA`, `US`; US returns 501 until its data is loaded), a prohibited check (409 with the prohibition, before FX and tariff lookup), and an `fta_qualified` tri-state for surtax orders with `exempt_if`; the response gained four always-present fields (`jurisdiction`, `fta_qualified`, `surtax_if_fta_qualified`, `total_if_fta_qualified`). Computed numbers for existing CA requests are unchanged.
+- `/landed-cost` gains cascading fees and taxes (`api/fees.py`): optional `include_taxes` (default `false`) adds Canadian GST (5% of duty-paid value); the response gains always-present `fees`, `taxes` and `include_taxes`, and `total` / `total_if_fta_qualified` include them. US MPF (dated FY2026/FY2027) and HMF schedules are defined for when the US profile returns data. Totals for requests without `include_taxes` are unchanged.
 
 ## v0.3 (2026-11-05)
 

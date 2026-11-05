@@ -19,7 +19,7 @@ curl http://localhost:8000/tariff/0902.30.00.00
 
 ## Jurisdictions
 
-`POST /landed-cost` takes an optional `jurisdiction` (default `CA`, case-insensitive), echoed in the response. An unregistered code returns 422 `unknown jurisdiction 'XX'`. `US` is registered but returns **501** `US profile has no data loaded yet; see the roadmap`, before any lookup. Optional `mode` (`road`, `rail`, `air`, `sea`, `multimodal`) is accepted and currently unused.
+`POST /landed-cost` takes an optional `jurisdiction` (default `CA`, case-insensitive), echoed in the response. An unregistered code returns 422 `unknown jurisdiction 'XX'`. `US` is registered but returns **501** `US profile has no data loaded yet; see the roadmap`, before any lookup. Optional `mode` (`road`, `rail`, `air`, `sea`, `multimodal`) selects mode-dependent fees (for example the US HMF applies only when `mode` is `sea`).
 
 Prohibited goods: before FX and tariff lookup, `prohibition` records for the request's jurisdiction, origin and date whose `hs_prefix` prefixes the HS code are matched (longest prefix wins). A match returns **409** with `{"prohibited": true, "hs_code", "origin_country", "jurisdiction", "list_id", "authority", "effective_from", "effective_to", "source_url", "message"}`. This is a correct non-2xx answer, not a fault: no landed cost is computed for goods that may not be entered.
 
@@ -34,7 +34,7 @@ Request fields: `hs_code`, `origin_country` (2 letters, case-insensitive), `decl
 - **FX**: when `declared_value.currency` is not `CAD`, the latest `fx_rate` record (`currency` = declared, `to` = `CAD`) with `on` on or before `shipment_date` is used. If none exists the API returns 422 `no CAD exchange rate on or before <date> for <CUR>; load the boc_fx connector`.
 - **Duty**: ad valorem, specific or compound, on `value_cad`. Specific components are already in CAD and unaffected by currency. `quantity` and `unit` accept `kg`, `tonne`, `litre`, `dozen`, `each`, `hl`, with common aliases.
 - **Surtax**: the `surtax_order` records in force on `shipment_date` for the HS code and origin are matched (`cbsa_surtax.applicable`); the longest prefix wins and `surtax = value_cad * pct / 100`. It applies in addition to duty whatever the treatment (a CUSMA-Free line from the US still pays it).
-- Money is rounded to 2 dp at the end only. `total = value_cad + duty + surtax`; `duty_rate` is `duty / value_cad * 100`.
+- Money is rounded to 2 dp at the end only. `total = value_cad + duty + surtax + fees + taxes`; `duty_rate` is `duty / value_cad * 100`.
 
 ```
 curl -X POST http://localhost:8000/landed-cost \
@@ -62,6 +62,23 @@ curl -X POST http://localhost:8000/landed-cost \
 
 Other 422 responses: a specific rate with a missing or mismatched quantity or unit ("this rate needs a quantity and unit in kg"), an `N/A` rate ("rate not applicable for this treatment"), an unparseable `shipment_date`, and an `origin_country` that is not two letters.
 
-Known gaps: surtax remission orders and exclusions are not modelled, and GST/PST are out of scope. Results are indicative only.
+Known gaps: surtax remission orders and exclusions are not modelled, and PST/HST are out of scope (see Fees and taxes). Results are indicative only.
+
+## Fees and taxes
+
+Each jurisdiction has an ordered fee schedule. `/landed-cost` evaluates it after duty and surtax with Decimal arithmetic and rounds each amount once, half-up to 2 dp. Rules run in list order against a context of `value` (CAD), `duty` and `surtax`. A rule's `base` is one of `value`, `duty`, `surtax`, `duty_paid_value` (= value + duty + surtax) or `fees_so_far` (the sum of fee amounts, not taxes, evaluated earlier in the list). A rule applies only when `effective_from <= shipment_date < effective_to` (`effective_to` may be null) and its `applies_when` matches (`{"mode": "sea"}` requires the request `mode` to be `sea`; no condition means always). `min` and `max` clamp the amount. Rules with `category: "tax"` are skipped unless the request sets `include_taxes: true` (default `false`, so existing totals are unchanged).
+
+The response always carries `fees` and `taxes` (lists of `{name, authority, base, base_amount, amount}`) and echoes `include_taxes`. `total` and `total_if_fta_qualified` include them; the FTA branch recomputes its own fees and taxes because duty-paid value changes with surtax. `components` gains one line per fee or tax, for example `GST 5% of duty-paid value 20,991.00 = 1,049.55` or `MPF 0.3464% of value 13,994.00 = 48.48 (min 34.58, max 670.86)`; a clamp that applied reads `(clamped to max 670.86)`.
+
+| Jurisdiction | Name | Rate | Base | Min / max | Effective | Authority |
+|---|---|---|---|---|---|---|
+| CA | GST (tax) | 5% | duty-paid value | none | 1991-01-01 onward | [ETA s.212](https://laws-lois.justice.gc.ca/eng/acts/E-15/) |
+| US | MPF (fee), FY2026 | 0.3464% | value | 33.58 / 651.50 | 2025-10-01 to 2026-10-01 | 19 CFR 24.23 / FR 2026-15530 |
+| US | MPF (fee), FY2027 | 0.3464% | value | 34.58 / 670.86 | 2026-10-01 onward | 19 CFR 24.23 / FR 2026-15530 |
+| US | HMF (fee), sea only | 0.125% | value | none | 1987-04-01 onward | 26 USC 4461 |
+
+The US schedule is defined and unit-tested but only runs once the US profile returns data (it currently returns 501).
+
+PST and HST are deliberately absent: they depend on the importer's province and registration, which are tenant facts and not properties of the goods.
 
 The web UI directory defaults to `<repo>/web`, found by walking up from the package to the nearest `pyproject.toml`; set `TRADELATTICE_WEB_DIR` to serve it from elsewhere (an installed copy outside the source tree shows a placeholder at `/` otherwise).

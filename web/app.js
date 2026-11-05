@@ -84,6 +84,7 @@ $('cost-form').addEventListener('submit', (ev) => {
   };
   body.jurisdiction = $('c-jur').value;
   if ($('c-fta').value !== '') body.fta_qualified = $('c-fta').value === 'true';
+  if ($('c-tax').checked) body.include_taxes = true;
   if ($('c-mode').value) body.mode = $('c-mode').value;
   if ($('c-qty').value !== '') body.quantity = Number($('c-qty').value);
   if ($('c-unit').value.trim()) body.unit = $('c-unit').value.trim();
@@ -112,10 +113,12 @@ $('cost-form').addEventListener('submit', (ev) => {
       <dt>Effective duty rate</dt><dd>${esc(r.duty_rate)}%</dd>
       <dt>Duty</dt><dd>${money({ amount: r.duty, currency: 'CAD' })}</dd>
       <dt>Surtax</dt><dd>${surLine ? esc(surLine) : 'none'}</dd>
+      ${(r.fees || []).map((f) => `<dt>${esc(f.name)}</dt><dd>${money({ amount: f.amount, currency: 'CAD' })}</dd>`).join('')}
+      ${(r.taxes || []).map((f) => `<dt>${esc(f.name)}</dt><dd>${money({ amount: f.amount, currency: 'CAD' })}</dd>`).join('')}
       <dt>Total</dt><dd><strong>${money({ amount: r.total, currency: 'CAD' })}</strong></dd>
       ${r.total_if_fta_qualified != null ? `<dt>Total if FTA qualified</dt><dd><strong>${money({ amount: r.total_if_fta_qualified, currency: 'CAD' })}</strong> (surtax ${esc(r.surtax_if_fta_qualified)})</dd>` : ''}</dl>
       ${comps.length ? '<ul class="muted">' + comps.map((c) => `<li>${esc(c)}</li>`).join('') + '</ul>' : ''}
-      <p class="muted">GST/PST are not included. Surtax remissions and exclusions are not modelled.</p>`;
+      <p class="muted">${r.include_taxes ? 'PST/HST are not included.' : 'GST/PST are not included.'} Surtax remissions and exclusions are not modelled.</p>`;
   });
 });
 
