@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from datetime import date, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -46,7 +46,7 @@ def test_currency_filter_and_missing_skipped():
 
 @pytest.mark.skipif(not os.environ.get("TRADELATTICE_LIVE"), reason="set TRADELATTICE_LIVE=1")
 def test_live_three_day_window():
-    end = date.today()
+    end = datetime.now(UTC).date()
     recs = list(boc_fx.fetch(live=True, start=end - timedelta(days=3), end=end))
     assert recs
     for rec in recs:
