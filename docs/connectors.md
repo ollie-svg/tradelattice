@@ -9,6 +9,7 @@ A connector maps one public dataset into spec records. Each lives in `src/tradel
 | `statcan_trade` | Statistics Canada merchandise trade by HS6 | `price_observation` (unit value = value / quantity) | Bundled CSV | Not implemented |
 | `boc_fx` | Bank of Canada Valet daily exchange rates | `fx_rate` | Bundled JSON | Implemented (default useful path) |
 | `cbsa_concordance` | CBSA / Finance Canada HS concordance workbooks | `hs_concordance` | Bundled xlsx (two files) | Implemented |
+| `cbsa_surtax` | Finance Canada counter-tariff lists (US-origin goods) | `surtax_order` | Bundled JSON | Implemented |
 
 ## Run a connector
 
@@ -44,6 +45,20 @@ python -m tradelattice.connectors.cbsa_concordance --out conc.jsonl [--live] [--
 - Editions default to `T<year-1>` to `T<year>` (assumes the January file supersedes the prior year's last edition). A `conc-8` file needs `--from-edition` and `--to-edition`, otherwise `ValueError`.
 - Relations: `same` (equal codes, 1:1), `renumbered` (different codes, 1:1), `split` (source has several targets; wins over `merged` when both apply), `merged` (target has several sources, source has one target). `removed` is never produced: every row has both codes.
 - `observed_at` is `<to_edition year>-01-01T00:00:00Z` (assumed edition start). `--report` prints counts by relation and by Finance change code (SC, WC, ...) to stderr; change codes are not stored in records.
+
+## cbsa_surtax
+
+Emits one `surtax_order` record per line of Finance Canada's counter-tariff (surtax) lists on US-origin goods. These are surtaxes under Customs Tariff s.53, applied in addition to the tariff rate, as a percentage of value for duty, by country of origin. Known gap in v0.2: remission orders and exclusions are NOT modelled, so a record shows the listed surtax, not necessarily what a given importer pays.
+
+```
+python -m tradelattice.connectors.cbsa_surtax --out surtax.jsonl [--live] [--list-id ID] [--url URL --list-id ID --effective-from YYYY-MM-DD] [--report]
+```
+
+- Without `--live` it emits every registered list's bundled sample (`LISTS` in `cbsa_surtax/__init__.py`; currently `finance-ca-counter-tariffs-2026-09-08`, 629 records: 50% x 413, 25% x 195, 15% x 21).
+- `--live` fetches the registry URL for `--list-id` (default: all registered lists) and parses its single HTML table. `--url` fetches an explicit page and requires `--list-id` and `--effective-from` (optional `--effective-to`, `--origin-country`, default US).
+- Ids are `cbsa_surtax:<list_id>:<hs_prefix>:<origin>`; `hs_prefix` is the 8-digit tariff item without dots; `pct` is a decimal string. `observed_at` is `effective_from` at T00:00:00Z (assumed; the page has no publication timestamp). No SOR number appears on the source page.
+- `applicable(records, hs_code, origin_country, on)` returns the attributes in force (hs_prefix is a prefix of the code, origin matches, `effective_from <= on < effective_to` or null), longest prefix first. It is pure and is what landed-cost calls.
+- `--report` prints counts by pct and by HS chapter to stderr.
 
 ## Edition tracking
 

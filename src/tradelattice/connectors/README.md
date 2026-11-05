@@ -9,15 +9,17 @@ Offline-first data connectors (ADR 0003). Each emits Envelope records validating
 | `statcan_trade` | `price_observation` | `statcan_trade/sample/cimt_imports_sample.csv` |
 | `boc_fx` | `fx_rate` | `boc_fx/sample/fx_rates_daily_sample.json` |
 | `cbsa_concordance` | `hs_concordance` | `cbsa_concordance/sample/*.xlsx` |
+| `cbsa_surtax` | `surtax_order` | `cbsa_surtax/sample/*.json` |
 
 ```
 python -m tradelattice.connectors.<name> --out records.jsonl [--since 2026-02-01] [--live]
 ```
 
-`--live` raises `NotImplementedError` for all connectors except `cbsa_tariff`, `boc_fx` and `cbsa_concordance`. Live sources:
+`--live` raises `NotImplementedError` for all connectors except `cbsa_tariff`, `boc_fx`, `cbsa_concordance` and `cbsa_surtax`. Live sources:
 - cbsa_tariff: live mode implemented (HTML chapter pages, T2026-2; `--live [--chapters 9,20]`), see https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/menu-eng.html
 - boc_fx: live mode implemented (Bank of Canada Valet, `FX_RATES_DAILY`), see below
 - cbsa_concordance: live mode implemented (yearly menu page -> xlsx workbooks), see below
+- cbsa_surtax: live mode implemented (Finance Canada counter-tariff list page), see below
 - canadabuys: https://canadabuys.canada.ca/en/tender-opportunities
 - statcan_trade: https://www150.statcan.gc.ca/
 
@@ -48,3 +50,17 @@ python -m tradelattice.connectors.cbsa_concordance --out conc.jsonl [--live] [--
 - Editions default to `T<year-1>` to `T<year>` (assumes the January file supersedes the prior year's last edition). A `conc-8` file needs `--from-edition` and `--to-edition`, otherwise `ValueError`.
 - Relations: `same` (equal codes, 1:1), `renumbered` (different codes, 1:1), `split` (source has several targets; wins over `merged` when both apply), `merged` (target has several sources, source has one target). `removed` is never produced: every row has both codes.
 - `observed_at` is `<to_edition year>-01-01T00:00:00Z` (assumed edition start). `--report` prints counts by relation and by Finance change code (SC, WC, ...) to stderr; change codes are not stored in records.
+
+## cbsa_surtax
+
+Emits one `surtax_order` record per line of Finance Canada's counter-tariff (surtax) lists on US-origin goods. These are surtaxes under Customs Tariff s.53, applied in addition to the tariff rate, as a percentage of value for duty, by country of origin. Known gap in v0.2: remission orders and exclusions are NOT modelled, so a record shows the listed surtax, not necessarily what a given importer pays.
+
+```
+python -m tradelattice.connectors.cbsa_surtax --out surtax.jsonl [--live] [--list-id ID] [--url URL --list-id ID --effective-from YYYY-MM-DD] [--report]
+```
+
+- Without `--live` it emits every registered list's bundled sample (`LISTS` in `cbsa_surtax/__init__.py`; currently `finance-ca-counter-tariffs-2026-09-08`, 629 records: 50% x 413, 25% x 195, 15% x 21).
+- `--live` fetches the registry URL for `--list-id` (default: all registered lists) and parses its single HTML table. `--url` fetches an explicit page and requires `--list-id` and `--effective-from` (optional `--effective-to`, `--origin-country`, default US).
+- Ids are `cbsa_surtax:<list_id>:<hs_prefix>:<origin>`; `hs_prefix` is the 8-digit tariff item without dots; `pct` is a decimal string. `observed_at` is `effective_from` at T00:00:00Z (assumed; the page has no publication timestamp). No SOR number appears on the source page.
+- `applicable(records, hs_code, origin_country, on)` returns the attributes in force (hs_prefix is a prefix of the code, origin matches, `effective_from <= on < effective_to` or null), longest prefix first. It is pure and is what landed-cost calls.
+- `--report` prints counts by pct and by HS chapter to stderr.

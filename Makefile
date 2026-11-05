@@ -17,6 +17,7 @@ load-samples:
 	$(PY) -m tradelattice.connectors.statcan_trade --out records.jsonl.tmp && cat records.jsonl.tmp >> records.jsonl && rm records.jsonl.tmp
 	$(PY) -m tradelattice.connectors.boc_fx --out records.jsonl.tmp && cat records.jsonl.tmp >> records.jsonl && rm records.jsonl.tmp
 	$(PY) -m tradelattice.connectors.cbsa_concordance --out records.jsonl.tmp && cat records.jsonl.tmp >> records.jsonl && rm records.jsonl.tmp
+	$(PY) -m tradelattice.connectors.cbsa_surtax --out records.jsonl.tmp && cat records.jsonl.tmp >> records.jsonl && rm records.jsonl.tmp
 	$(PY) -m tradelattice.api.cli load records.jsonl
 
 serve:
