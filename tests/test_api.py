@@ -134,7 +134,9 @@ def test_landed_cost(client):
     )
     r = landed(client)
     assert r.status_code == 200
-    assert r.json() == {
+    j = r.json()
+    assert j.pop("shipment_date")
+    assert j == {
         "hs_code": "0902300000",
         "matched_hs_code": "090230",
         "treatment": "MFN",
@@ -142,6 +144,13 @@ def test_landed_cost(client):
         "duty": 13.0,
         "total": 213.0,
         "currency": "CAD",
+        "declared_currency": "CAD",
+        "value_cad": 200.0,
+        "fx_rate": None,
+        "fx_on": None,
+        "surtax_pct": None,
+        "surtax": 0.0,
+        "surtax_list_id": None,
         "rate": "6.5%",
         "components": ["6.5% ad valorem = 13.00"],
         "basis": "ad_valorem",

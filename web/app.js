@@ -72,6 +72,7 @@ const money = (v) => {
   if (v && typeof v === 'object') return `${esc(v.amount)} ${esc(v.currency || '')}`;
   return esc(v);
 };
+$('c-ship').value = new Date().toISOString().slice(0, 10);
 $('cost-form').addEventListener('submit', (ev) => {
   ev.preventDefault();
   const body = {
@@ -79,6 +80,7 @@ $('cost-form').addEventListener('submit', (ev) => {
     origin_country: $('c-origin').value.trim().toUpperCase(),
     declared_value: { amount: Number($('c-amount').value), currency: $('c-currency').value.trim().toUpperCase() || 'CAD' },
     treatment: $('c-treatment').value.trim() || 'MFN',
+    shipment_date: $('c-ship').value,
   };
   if ($('c-qty').value !== '') body.quantity = Number($('c-qty').value);
   if ($('c-unit').value.trim()) body.unit = $('c-unit').value.trim();
@@ -86,12 +88,18 @@ $('cost-form').addEventListener('submit', (ev) => {
     const r = await api('/landed-cost', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
     });
-    return `<dl><dt>Rate</dt><dd>${esc(r.rate)}</dd>
+    const comps = r.components || [];
+    const fxLine = comps.find((c) => c.startsWith('FX '));
+    const surLine = comps.find((c) => c.startsWith('surtax '));
+    return `<dl><dt>Value in CAD</dt><dd>${money({ amount: r.value_cad, currency: 'CAD' })}</dd>
+      ${fxLine ? `<dt>Exchange rate</dt><dd>${esc(fxLine)}</dd>` : ''}
+      <dt>Rate</dt><dd>${esc(r.rate)}</dd>
       <dt>Effective duty rate</dt><dd>${esc(r.duty_rate)}%</dd>
-      <dt>Duty</dt><dd>${money(r.duty)}</dd>
-      <dt>Total</dt><dd><strong>${money(r.total)}</strong></dd></dl>
-      ${(r.components || []).length ? '<ul class="muted">' + r.components.map((c) => `<li>${esc(c)}</li>`).join('') + '</ul>' : ''}
-      <p class="muted">GST is not included.</p>`;
+      <dt>Duty</dt><dd>${money({ amount: r.duty, currency: 'CAD' })}</dd>
+      <dt>Surtax</dt><dd>${surLine ? esc(surLine) : 'none'}</dd>
+      <dt>Total</dt><dd><strong>${money({ amount: r.total, currency: 'CAD' })}</strong></dd></dl>
+      ${comps.length ? '<ul class="muted">' + comps.map((c) => `<li>${esc(c)}</li>`).join('') + '</ul>' : ''}
+      <p class="muted">GST/PST are not included. Surtax remissions and exclusions are not modelled.</p>`;
   });
 });
 

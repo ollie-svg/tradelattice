@@ -9,7 +9,7 @@ The API is FastAPI with SQLite by default. Set `DATABASE_URL` to use Postgres. I
 | GET | `/records` | List records. Filters: `type`, `source`, `q`, `limit`, `offset` |
 | GET | `/records/{id}` | Fetch one record |
 | GET | `/tariff/{hs_code}` | Best-match tariff line, by longest HS prefix |
-| POST | `/landed-cost` | Duty and total for a declared value |
+| POST | `/landed-cost` | Landed cost in CAD: FX conversion, duty and origin surtax |
 
 ## Tariff lookup
 
@@ -19,38 +19,41 @@ curl http://localhost:8000/tariff/0902.30.00.00
 
 ## Landed cost
 
-```
-curl -X POST http://localhost:8000/landed-cost \
-  -H 'Content-Type: application/json' \
-  -d '{"hs_code": "09023000", "origin_country": "US",
-       "declared_value": {"amount": 1000, "currency": "CAD"}, "treatment": "MFN"}'
-```
+`POST /landed-cost` returns the landed cost in CAD. In order: the declared value is converted to CAD at the Bank of Canada rate for the shipment date, duty is evaluated on that CAD value, and any origin surtax is added.
 
-Optional `quantity` and `unit` are needed for specific rates (`kg`, `tonne`, `litre`, `dozen`, `each`, `hl`, with common aliases). Per-tonne rates accept kg quantities and per-hl rates accept litres.
+Request fields: `hs_code`, `origin_country` (2 letters, case-insensitive), `declared_value` (`amount`, `currency`), optional `treatment` (default `MFN`), optional `quantity` and `unit` for specific rates, and optional `shipment_date` (ISO date, default today UTC).
 
-The response holds `rate` (the raw CBSA string), `basis` (`ad_valorem`, `specific` or `compound`), `components` (the arithmetic, one line per part), `duty_rate` (effective duty as a percentage of value), `duty` and `total`.
-
-Compound example, `5% but not less than 4.74¢/kg or more than 9.48¢/kg`:
+- **FX**: when `declared_value.currency` is not `CAD`, the latest `fx_rate` record (`currency` = declared, `to` = `CAD`) with `on` on or before `shipment_date` is used. If none exists the API returns 422 `no CAD exchange rate on or before <date> for <CUR>; load the boc_fx connector`.
+- **Duty**: ad valorem, specific or compound, on `value_cad`. Specific components are already in CAD and unaffected by currency. `quantity` and `unit` accept `kg`, `tonne`, `litre`, `dozen`, `each`, `hl`, with common aliases.
+- **Surtax**: the `surtax_order` records in force on `shipment_date` for the HS code and origin are matched (`cbsa_surtax.applicable`); the longest prefix wins and `surtax = value_cad * pct / 100`. It applies in addition to duty whatever the treatment (a CUSMA-Free line from the US still pays it).
+- Money is rounded to 2 dp at the end only. `total = value_cad + duty + surtax`; `duty_rate` is `duty / value_cad * 100`.
 
 ```
 curl -X POST http://localhost:8000/landed-cost \
   -H 'Content-Type: application/json' \
-  -d '{"hs_code": "09023000", "origin_country": "US",
-       "declared_value": {"amount": 1000, "currency": "CAD"},
-       "quantity": 2000, "unit": "kg"}'
+  -d '{"hs_code": "7208.36.00", "origin_country": "US",
+       "declared_value": {"amount": 1000, "currency": "USD"},
+       "treatment": "MFN", "shipment_date": "2026-11-04"}'
 ```
 
 ```
-{"rate": "5% but not less than 4.74¢/kg or more than 9.48¢/kg",
- "basis": "compound",
- "components": ["5% ad valorem = 50.00",
-                "floor 4.74¢/kg × 2000 kg = 94.80",
-                "cap 9.48¢/kg × 2000 kg = 189.60"],
- "duty_rate": 9.48, "duty": 94.8, "total": 1094.8, ...}
+{"hs_code": "72083600", "matched_hs_code": "72083600", "treatment": "MFN",
+ "duty_rate": 0.0, "duty": 0.0, "total": 2099.1,
+ "currency": "CAD", "declared_currency": "USD",
+ "value_cad": 1399.4, "fx_rate": "1.3994", "fx_on": "2026-11-03",
+ "surtax_pct": "50", "surtax": 699.7,
+ "surtax_list_id": "finance-ca-counter-tariffs-2026-09-08",
+ "shipment_date": "2026-11-04",
+ "rate": "Free", "basis": "ad_valorem",
+ "components": ["FX USD→CAD at 1.3994 (BoC 2026-11-03): 1,000.00 USD = 1,399.40 CAD",
+                "0% ad valorem = 0.00",
+                "surtax 50% of 1,399.40 (finance-ca-counter-tariffs-2026-09-08, origin US) = 699.70"]}
 ```
 
-Returns HTTP 422 when a specific rate needs a quantity or unit that is missing or does not match ("this rate needs a quantity and unit in kg"), and when the rate is `N/A` ("rate not applicable for this treatment").
+`currency` is always `CAD`; `declared_currency` echoes the input. `fx_rate`, `fx_on`, `surtax_pct` and `surtax_list_id` are `null` when not used.
 
-GST is not calculated in v0.1. Results are indicative only.
+Other 422 responses: a specific rate with a missing or mismatched quantity or unit ("this rate needs a quantity and unit in kg"), an `N/A` rate ("rate not applicable for this treatment"), an unparseable `shipment_date`, and an `origin_country` that is not two letters.
+
+Known gaps: surtax remission orders and exclusions are not modelled, and GST/PST are out of scope. Results are indicative only.
 
 The web UI directory defaults to `<repo>/web`, found by walking up from the package to the nearest `pyproject.toml`; set `TRADELATTICE_WEB_DIR` to serve it from elsewhere (an installed copy outside the source tree shows a placeholder at `/` otherwise).

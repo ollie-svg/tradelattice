@@ -32,6 +32,7 @@ class LandedCostIn(BaseModel):
     treatment: str | None = None
     quantity: float | None = None
     unit: str | None = None
+    shipment_date: str | None = None
 
 
 class LandedCostOut(BaseModel):
@@ -42,6 +43,14 @@ class LandedCostOut(BaseModel):
     duty: float
     total: float
     currency: str
+    declared_currency: str
+    value_cad: float
+    fx_rate: str | None = None
+    fx_on: str | None = None
+    surtax_pct: str | None = None
+    surtax: float = 0.0
+    surtax_list_id: str | None = None
+    shipment_date: str
     rate: str
     components: list[str]
     basis: Literal["ad_valorem", "specific", "compound"]

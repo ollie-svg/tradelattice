@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import re
 from contextlib import asynccontextmanager
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -12,6 +13,8 @@ from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import String, cast, func, select
 from sqlalchemy.orm import Session
+
+from tradelattice.connectors.cbsa_surtax import applicable
 
 from .db import get_session, init_db
 from .duty import DutyInputError, NotApplicable, basis, evaluate, parse_duty
@@ -124,9 +127,36 @@ def get_tariff(hs_code: str, session: Db) -> dict:
     return _best_tariff(session, _normalize_hs(hs_code)).to_dict()
 
 
+def _fx_for(session: Session, currency: str, on: str) -> tuple[str, str]:
+    """Return (rate string, rate date) for the latest fx_rate to CAD on or before `on`."""
+    best: dict | None = None
+    for r in session.scalars(select(Record).where(Record.type == "fx_rate")):
+        a = r.attributes
+        if a.get("currency") != currency or a.get("to") != "CAD" or str(a.get("on", "9999")) > on:
+            continue
+        if best is None or a["on"] > best["on"]:
+            best = a
+    if best is None:
+        raise HTTPException(
+            422,
+            f"no CAD exchange rate on or before {on} for {currency}; load the boc_fx connector",
+        )
+    return str(best["rate"]), str(best["on"])
+
+
 @app.post("/landed-cost", response_model=LandedCostOut)
 def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
     hs = _normalize_hs(body.hs_code)
+    origin = body.origin_country.strip().upper()
+    if not re.fullmatch(r"[A-Z]{2}", origin):
+        raise HTTPException(422, "origin_country must be a 2-letter country code")
+    if body.shipment_date is None:
+        ship = datetime.now(UTC).date().isoformat()
+    else:
+        try:
+            ship = date.fromisoformat(body.shipment_date).isoformat()
+        except ValueError as e:
+            raise HTTPException(422, "shipment_date must be an ISO date (YYYY-MM-DD)") from e
     line = _best_tariff(session, hs)
     treatment = body.treatment or "MFN"
     rate_str = next(
@@ -136,25 +166,62 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
     if rate_str is None:
         raise HTTPException(404, f"no rate for treatment {treatment!r} on {line.attributes['hs_code']}")
     amount = body.declared_value.amount
+    cur = body.declared_value.currency.strip().upper()
+    fx_rate: str | None = None
+    fx_on: str | None = None
+    fx_lines: list[str] = []
+    if cur == "CAD":
+        value_cad = amount
+    else:
+        fx_rate, fx_on = _fx_for(session, cur, ship)
+        value_cad = amount * float(fx_rate)
+        fx_lines.append(
+            f"FX {cur}→CAD at {fx_rate} (BoC {fx_on}): {amount:,.2f} {cur} = {value_cad:,.2f} CAD"
+        )
     try:
         node = parse_duty(rate_str)
         if isinstance(node, NotApplicable):
             raise DutyInputError("rate not applicable for this treatment")
-        raw_duty, components = evaluate(node, amount, body.quantity, body.unit)
+        raw_duty, components = evaluate(node, value_cad, body.quantity, body.unit)
     except DutyInputError as e:
         raise HTTPException(422, str(e)) from e
+    surtax_pct: str | None = None
+    surtax_list: str | None = None
+    raw_surtax = 0.0
+    sur_lines: list[str] = []
+    orders = [r.to_dict() for r in session.scalars(select(Record).where(Record.type == "surtax_order"))]
+    hits = applicable(orders, hs, origin, ship)
+    if hits:
+        hit = hits[0]
+        surtax_pct = str(hit["pct"])
+        surtax_list = hit["list_id"]
+        raw_surtax = value_cad * float(surtax_pct) / 100
+        sur_lines.append(
+            f"surtax {float(surtax_pct):g}% of {value_cad:,.2f} ({surtax_list}, origin {origin}) "
+            f"= {raw_surtax:,.2f}"
+        )
     duty = round(raw_duty, 2)
-    pct = round(duty / amount * 100, 2) if amount else 0.0
+    surtax = round(raw_surtax, 2)
+    vcad = round(value_cad, 2)
+    pct = round(duty / value_cad * 100, 2) if value_cad else 0.0
     return LandedCostOut(
         hs_code=hs,
         matched_hs_code=str(line.attributes["hs_code"]),
         treatment=treatment,
         duty_rate=pct,
         duty=duty,
-        total=round(amount + duty, 2),
-        currency=body.declared_value.currency,
+        total=round(value_cad + raw_duty + raw_surtax, 2),
+        currency="CAD",
+        declared_currency=cur,
+        value_cad=vcad,
+        fx_rate=fx_rate,
+        fx_on=fx_on,
+        surtax_pct=surtax_pct,
+        surtax=surtax,
+        surtax_list_id=surtax_list,
+        shipment_date=ship,
         rate=rate_str,
-        components=components,
+        components=fx_lines + components + sur_lines,
         basis=basis(node),
     )
 
