@@ -29,7 +29,7 @@ Exactly one order may apply. After the `exempt_if` filter, if more than one `sur
 
 ## Landed cost
 
-`POST /landed-cost` returns the landed cost in CAD. The computation is a pure function, `tradelattice.api.landed.compute(request, records, jurisdiction, today)`, over the records the route loads from the database (ADR 0005); the route only loads records and maps the two refusal exceptions below to HTTP. Consumers may call `compute()` directly on their own record set, or run their own implementation against `tests/golden/landed_cost.jsonl`.
+`POST /landed-cost` returns the landed cost in CAD. The computation is a pure function, `tradelattice.api.landed.compute(request, records, jurisdiction, today)`, over the records the route loads from the database (ADR 0005); the route only loads records and maps the two refusal exceptions below to HTTP. Consumers may call `compute()` directly on their own record set, or run their own implementation against the golden cases shipped in the package (`tradelattice.golden.cases()` and the comparison rule `tradelattice.golden.check()`).
 
 ### Refusals and reason codes
 

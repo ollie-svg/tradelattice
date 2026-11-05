@@ -17,8 +17,9 @@
 Comparison rule (the same for every consumer): money fields — `duty`, `surtax`,
 `surtax_if_fta_qualified`, `total`, `total_if_fta_qualified`, `value_cad`, and `amount` /
 `base_amount` inside `fees[]` and `taxes[]` — match within **0.01**; everything else matches
-exactly. `tests/test_landed_pure.py::test_golden` is the in-repo runner; a consumer running
-its own implementation in parity reads this file and applies the same rule.
+exactly. `tradelattice.golden.cases()` returns the cases; `tradelattice.golden.check(expected, actual)` is the
+rule as code, so a consumer does not re-implement it. `tests/test_landed_pure.py::test_golden` is the
+in-repo runner. The file ships as package data, so a `pip install` from a pinned commit or tag carries it.
 
 Add a case whenever a verified number or a refusal is worth freezing. Never edit an expected
 value to make a test pass without a release-note line saying which number changed and why.

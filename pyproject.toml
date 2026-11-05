@@ -23,7 +23,7 @@ dependencies = [
 tradelattice-api = "tradelattice.api.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff"]
+dev = ["pytest", "ruff==0.16.9"]
 docs = ["mkdocs<2", "mkdocs-material"]
 
 [tool.setuptools.packages.find]
@@ -31,6 +31,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "tradelattice.spec" = ["schemas/*.json", "examples/*.json"]
+"tradelattice.golden" = ["*.jsonl", "README.md"]
 "tradelattice.connectors" = ["*/sample/*.csv", "*/sample/*.json", "*/fixtures/*.html", "*/sample/*.xlsx"]
 
 [tool.ruff]
