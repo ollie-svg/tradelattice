@@ -97,19 +97,41 @@ def test_d_prohibited(client):
 
 
 def test_e_fta_tristate(client):
-    # fixture has 50% on 72083600; replace with 50% on the shorter prefix 7208
-    client.post("/records", json=[sur("s:1", "7208", "50"), sur("s:exempt", "72083600", "25",
-                                                                exempt_if="fta_qualified")])
+    # one conditional order on the line (overwrites the fixture's s:1); qualification unknown
+    # -> both outcomes, never a choice
+    client.post("/records", json=[sur("s:1", "72083600", "25", exempt_if="fta_qualified")])
     cad = {"amount": 1000, "currency": "CAD"}
     t = post(client, declared_value=cad, fta_qualified=True).json()
-    assert t["surtax"] == 500 and t["surtax_pct"] == "50" and t["surtax_if_fta_qualified"] is None
+    assert t["surtax"] == 0 and t["surtax_pct"] is None and t["surtax_if_fta_qualified"] is None
     f = post(client, declared_value=cad, fta_qualified=False).json()
     assert f["surtax"] == 250 and f["surtax_pct"] == "25" and f["fta_qualified"] is False
+    assert f["surtax_if_fta_qualified"] is None
     n = post(client, declared_value=cad).json()
     assert n["fta_qualified"] is None
-    assert n["surtax"] == 250 and n["surtax_if_fta_qualified"] == 500
-    assert n["total"] == 1250 and n["total_if_fta_qualified"] == 1500
-    assert "FTA qualification unknown: surtax 250.00 if not qualified, 500.00 if qualified" in n["components"]
+    assert n["surtax"] == 250 and n["surtax_if_fta_qualified"] == 0
+    assert n["total"] == 1250 and n["total_if_fta_qualified"] == 1000
+    assert "FTA qualification unknown: surtax 250.00 if not qualified, 0.00 if qualified" in n["components"]
+
+
+def test_e2_two_orders_refuse(client):
+    # fixture has 50% on 72083600; add 25% exempt-if on the shorter prefix 7208.
+    # Two orders apply unless FTA qualification removes the conditional one.
+    client.post("/records", json=[sur("s:exempt", "7208", "25", exempt_if="fta_qualified")])
+    cad = {"amount": 1000, "currency": "CAD"}
+    t = post(client, declared_value=cad, fta_qualified=True).json()
+    assert t["surtax"] == 500 and t["surtax_list_id"] == LIST
+    for over in ({"fta_qualified": False}, {}):
+        r = post(client, declared_value=cad, **over)
+        assert r.status_code == 422, r.json()
+        j = r.json()
+        assert j["reason"] == "surtax_ambiguous"
+        assert "2 surtax orders apply" in j["detail"] and "stacking is declared but not computed" in j["detail"]
+
+
+def test_e3_two_additive_orders_refuse_regardless_of_stacking_flag(client):
+    client.post("/records", json=[sur("s:2", "7208", "10", stacking="additive")])
+    r = post(client, declared_value={"amount": 1000, "currency": "CAD"})
+    assert r.status_code == 422 and r.json()["reason"] == "surtax_ambiguous"
 
 
 def test_f_basis_unsupported(client):

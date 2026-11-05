@@ -179,17 +179,25 @@ def compute(
     sur_lines: list[str] = []
     orders = [r for r in records.surtax_orders if r.get("jurisdiction") == jcode]
     hits = applicable(orders, hs, origin, ship)
-    non_exempt = [h for h in hits if h.get("exempt_if") != "fta_qualified"]
     fta = request.fta_qualified
-    hit = (non_exempt[0] if non_exempt else None) if fta is True else (hits[0] if hits else None)
-    alt = non_exempt[0] if non_exempt else None  # chosen order if the goods qualify (fta unknown)
+    if fta is True:
+        hits = [h for h in hits if h.get("exempt_if") != "fta_qualified"]
+    if len(hits) > 1:
+        # The record declares `stacking` but nothing computes it yet: refuse rather than pick
+        # one (schema text; ADR 0005 corollary). Stacking arithmetic arrives with the US overlays.
+        ids = ", ".join(h["list_id"] for h in hits)
+        raise NotComputable(
+            422, "surtax_ambiguous",
+            f"{len(hits)} surtax orders apply to {hs} from {origin} on {ship} ({ids}); "
+            "stacking is declared but not computed, so no single surtax can be chosen",
+        )
+    hit = hits[0] if hits else None
+    if hit is not None and hit.get("basis", "value") != "value":
+        raise NotComputable(
+            422, "surtax_content_basis",
+            f"surtax basis {hit['basis']!r} needs a content value; not supported yet",
+        )
     raw_alt: float | None = None
-    for h in (hit, alt if fta is None else None):
-        if h is not None and h.get("basis", "value") != "value":
-            raise NotComputable(
-                422, "surtax_content_basis",
-                f"surtax basis {h['basis']!r} needs a content value; not supported yet",
-            )
     if hit:
         surtax_pct = str(hit["pct"])
         surtax_list = hit["list_id"]
@@ -198,8 +206,9 @@ def compute(
             f"surtax {float(surtax_pct):g}% of {value:,.2f} ({surtax_list}, origin {origin}) "
             f"= {raw_surtax:,.2f}"
         )
-    if fta is None and any(h.get("exempt_if") == "fta_qualified" for h in hits):
-        raw_alt = value * float(alt["pct"]) / 100 if alt else 0.0
+    if fta is None and hit is not None and hit.get("exempt_if") == "fta_qualified":
+        # One conditional order and qualification unknown: report both outcomes, never choose.
+        raw_alt = 0.0
         sur_lines.append(
             f"FTA qualification unknown: surtax {round(raw_surtax, 2):.2f} if not qualified, "
             f"{round(raw_alt, 2):.2f} if qualified"
