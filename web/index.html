@@ -41,6 +41,12 @@
       <input id="c-qty" type="number" min="0" step="any">
       <label for="c-unit">Unit</label>
       <input id="c-unit" placeholder="kg">
+      <label for="c-jur">Jurisdiction</label>
+      <select id="c-jur"><option>CA</option><option>US</option></select>
+      <label for="c-fta">FTA qualified</label>
+      <select id="c-fta"><option value="">unknown</option><option value="true">yes</option><option value="false">no</option></select>
+      <label for="c-mode">Mode (optional)</label>
+      <select id="c-mode"><option value="">-</option><option>road</option><option>rail</option><option>air</option><option>sea</option><option>multimodal</option></select>
       <button type="submit">Calculate</button>
     </form>
     <div id="cost-out" class="out" aria-live="polite"></div>

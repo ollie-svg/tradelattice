@@ -154,6 +154,10 @@ def test_landed_cost(client):
         "rate": "6.5%",
         "components": ["6.5% ad valorem = 13.00"],
         "basis": "ad_valorem",
+        "jurisdiction": "CA",
+        "fta_qualified": None,
+        "surtax_if_fta_qualified": None,
+        "total_if_fta_qualified": None,
     }
     assert landed(client, treatment="CUSMA").json()["duty"] == 0
     assert landed(client, treatment="ZERO").json()["duty_rate"] == 0

@@ -9,16 +9,18 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import String, cast, func, select
 from sqlalchemy.orm import Session
 
 from tradelattice.connectors.cbsa_surtax import applicable
 
+from . import jurisdictions
 from .db import get_session, init_db
 from .duty import DutyInputError, NotApplicable, basis, evaluate, parse_duty
 from .models import Record
+from .overlays import prohibited
 from .schemas import LandedCostIn, LandedCostOut, RecordOut, UpsertResult
 from .store import upsert_records
 from .validation import validate_records
@@ -145,7 +147,14 @@ def _fx_for(session: Session, currency: str, on: str) -> tuple[str, str]:
 
 
 @app.post("/landed-cost", response_model=LandedCostOut)
-def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
+def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut | JSONResponse:
+    jcode = body.jurisdiction.strip().upper()
+    try:
+        jurisdictions.get(jcode)
+    except KeyError as e:
+        raise HTTPException(422, f"unknown jurisdiction {jcode!r}") from e
+    if jcode == "US":
+        raise HTTPException(501, "US profile has no data loaded yet; see the roadmap")
     hs = _normalize_hs(body.hs_code)
     origin = body.origin_country.strip().upper()
     if not re.fullmatch(r"[A-Z]{2}", origin):
@@ -157,6 +166,10 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
             ship = date.fromisoformat(body.shipment_date).isoformat()
         except ValueError as e:
             raise HTTPException(422, "shipment_date must be an ISO date (YYYY-MM-DD)") from e
+    bans = [r.to_dict() for r in session.scalars(select(Record).where(Record.type == "prohibition"))]
+    ban = prohibited(bans, hs, origin, ship, jcode)
+    if ban is not None:
+        return JSONResponse(status_code=409, content=ban)
     line = _best_tariff(session, hs)
     treatment = body.treatment or "MFN"
     rate_str = next(
@@ -191,14 +204,28 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
     sur_lines: list[str] = []
     orders = [r.to_dict() for r in session.scalars(select(Record).where(Record.type == "surtax_order"))]
     hits = applicable(orders, hs, origin, ship)
-    if hits:
-        hit = hits[0]
+    non_exempt = [h for h in hits if h.get("exempt_if") != "fta_qualified"]
+    fta = body.fta_qualified
+    hit = (non_exempt[0] if non_exempt else None) if fta is True else (hits[0] if hits else None)
+    alt = non_exempt[0] if non_exempt else None  # chosen order if the goods qualify (fta unknown)
+    raw_alt: float | None = None
+    for h in (hit, alt if fta is None else None):
+        if h is not None and h.get("basis", "value") != "value":
+            raise HTTPException(
+                422, f"surtax basis {h['basis']!r} needs a content value; not supported yet")
+    if hit:
         surtax_pct = str(hit["pct"])
         surtax_list = hit["list_id"]
         raw_surtax = value_cad * float(surtax_pct) / 100
         sur_lines.append(
             f"surtax {float(surtax_pct):g}% of {value_cad:,.2f} ({surtax_list}, origin {origin}) "
             f"= {raw_surtax:,.2f}"
+        )
+    if fta is None and any(h.get("exempt_if") == "fta_qualified" for h in hits):
+        raw_alt = value_cad * float(alt["pct"]) / 100 if alt else 0.0
+        sur_lines.append(
+            f"FTA qualification unknown: surtax {round(raw_surtax, 2):.2f} if not qualified, "
+            f"{round(raw_alt, 2):.2f} if qualified"
         )
     duty = round(raw_duty, 2)
     surtax = round(raw_surtax, 2)
@@ -223,6 +250,11 @@ def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut:
         rate=rate_str,
         components=fx_lines + components + sur_lines,
         basis=basis(node),
+        jurisdiction=jcode,
+        fta_qualified=fta,
+        surtax_if_fta_qualified=None if raw_alt is None else round(raw_alt, 2),
+        total_if_fta_qualified=(
+            None if raw_alt is None else round(value_cad + raw_duty + raw_alt, 2)),
     )
 
 

@@ -82,12 +82,27 @@ $('cost-form').addEventListener('submit', (ev) => {
     treatment: $('c-treatment').value.trim() || 'MFN',
     shipment_date: $('c-ship').value,
   };
+  body.jurisdiction = $('c-jur').value;
+  if ($('c-fta').value !== '') body.fta_qualified = $('c-fta').value === 'true';
+  if ($('c-mode').value) body.mode = $('c-mode').value;
   if ($('c-qty').value !== '') body.quantity = Number($('c-qty').value);
   if ($('c-unit').value.trim()) body.unit = $('c-unit').value.trim();
   run(ev.target, $('cost-out'), async () => {
-    const r = await api('/landed-cost', {
+    const res = await fetch('/landed-cost', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
     });
+    if (res.status === 409) {
+      const p = await res.json();
+      const link = /^https?:\/\//.test(p.source_url || '')
+        ? ` <a href="${esc(p.source_url)}" rel="noopener noreferrer">source</a>` : '';
+      return `<div class="err" role="alert"><strong>Prohibited</strong>
+        <p>${esc(p.message)}</p>
+        <p>List ${esc(p.list_id)} (${esc(p.jurisdiction)}, origin ${esc(p.origin_country)}, HS ${esc(p.hs_code)});
+        effective ${esc(p.effective_from)}${p.effective_to ? ' to ' + esc(p.effective_to) : ''}.${link}</p></div>`;
+    }
+    if (res.status === 501) return `<p class="muted" role="status">${esc(await errorText(res))}</p>`;
+    if (!res.ok) throw new Error(await errorText(res));
+    const r = await res.json();
     const comps = r.components || [];
     const fxLine = comps.find((c) => c.startsWith('FX '));
     const surLine = comps.find((c) => c.startsWith('surtax '));
@@ -97,7 +112,8 @@ $('cost-form').addEventListener('submit', (ev) => {
       <dt>Effective duty rate</dt><dd>${esc(r.duty_rate)}%</dd>
       <dt>Duty</dt><dd>${money({ amount: r.duty, currency: 'CAD' })}</dd>
       <dt>Surtax</dt><dd>${surLine ? esc(surLine) : 'none'}</dd>
-      <dt>Total</dt><dd><strong>${money({ amount: r.total, currency: 'CAD' })}</strong></dd></dl>
+      <dt>Total</dt><dd><strong>${money({ amount: r.total, currency: 'CAD' })}</strong></dd>
+      ${r.total_if_fta_qualified != null ? `<dt>Total if FTA qualified</dt><dd><strong>${money({ amount: r.total_if_fta_qualified, currency: 'CAD' })}</strong> (surtax ${esc(r.surtax_if_fta_qualified)})</dd>` : ''}</dl>
       ${comps.length ? '<ul class="muted">' + comps.map((c) => `<li>${esc(c)}</li>`).join('') + '</ul>' : ''}
       <p class="muted">GST/PST are not included. Surtax remissions and exclusions are not modelled.</p>`;
   });

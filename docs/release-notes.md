@@ -1,5 +1,9 @@
 # Release notes
 
+## Unreleased
+
+- `/landed-cost` gains a `jurisdiction` switch (`CA`, `US`; US returns 501 until its data is loaded), a prohibited check (409 with the prohibition, before FX and tariff lookup), and an `fta_qualified` tri-state for surtax orders with `exempt_if`; the response gained four always-present fields (`jurisdiction`, `fta_qualified`, `surtax_if_fta_qualified`, `total_if_fta_qualified`). Computed numbers for existing CA requests are unchanged.
+
 ## v0.3 (2026-11-05)
 
 - Added record type `prohibition` (an import prohibition by origin and tariff-code prefix and date range), and added it to the envelope `type` enum.

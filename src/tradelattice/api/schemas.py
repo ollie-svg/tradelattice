@@ -33,6 +33,9 @@ class LandedCostIn(BaseModel):
     quantity: float | None = None
     unit: str | None = None
     shipment_date: str | None = None
+    jurisdiction: str = "CA"
+    fta_qualified: bool | None = None
+    mode: Literal["road", "rail", "air", "sea", "multimodal"] | None = None  # unused until chunk 2
 
 
 class LandedCostOut(BaseModel):
@@ -54,3 +57,7 @@ class LandedCostOut(BaseModel):
     rate: str
     components: list[str]
     basis: Literal["ad_valorem", "specific", "compound"]
+    jurisdiction: str = "CA"
+    fta_qualified: bool | None = None
+    surtax_if_fta_qualified: float | None = None
+    total_if_fta_qualified: float | None = None

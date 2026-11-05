@@ -17,6 +17,14 @@ The API is FastAPI with SQLite by default. Set `DATABASE_URL` to use Postgres. I
 curl http://localhost:8000/tariff/0902.30.00.00
 ```
 
+## Jurisdictions
+
+`POST /landed-cost` takes an optional `jurisdiction` (default `CA`, case-insensitive), echoed in the response. An unregistered code returns 422 `unknown jurisdiction 'XX'`. `US` is registered but returns **501** `US profile has no data loaded yet; see the roadmap`, before any lookup. Optional `mode` (`road`, `rail`, `air`, `sea`, `multimodal`) is accepted and currently unused.
+
+Prohibited goods: before FX and tariff lookup, `prohibition` records for the request's jurisdiction, origin and date whose `hs_prefix` prefixes the HS code are matched (longest prefix wins). A match returns **409** with `{"prohibited": true, "hs_code", "origin_country", "jurisdiction", "list_id", "authority", "effective_from", "effective_to", "source_url", "message"}`. This is a correct non-2xx answer, not a fault: no landed cost is computed for goods that may not be entered.
+
+FTA tri-state: a `surtax_order` with `exempt_if: "fta_qualified"` is skipped when `fta_qualified` is `true`, applied when `false`, and when omitted or `null` both outcomes are reported. `surtax` and `total` are the not-qualified figures; `surtax_if_fta_qualified` and `total_if_fta_qualified` are the qualified ones (both `null` when `fta_qualified` is set, or no exempt order matched). Within each set only the longest-prefix order applies; stacking is not supported yet. Example: a 25% order with `exempt_if` on `72083600` and a 50% order on `7208`, on 1000 CAD, give `surtax` 250.00, `surtax_if_fta_qualified` 500.00 and the component line `FTA qualification unknown: surtax 250.00 if not qualified, 500.00 if qualified`. A chosen order whose `basis` is not `value` returns 422 `surtax basis 'non_fta_content_value' needs a content value; not supported yet`.
+
 ## Landed cost
 
 `POST /landed-cost` returns the landed cost in CAD. In order: the declared value is converted to CAD at the Bank of Canada rate for the shipment date, duty is evaluated on that CAD value, and any origin surtax is added.
