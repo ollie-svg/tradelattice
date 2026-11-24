@@ -16,7 +16,6 @@ Schema with 10 record types (spec v0.3: adds `prohibition`; overlay fields on `s
 - PST/HST (depends on the importer's province and registration: a tenant fact, not a line fact).
 - Authentication and authorization; multi-tenant deployments.
 - Real-time feeds.
-- ML (matching, forecasting, classification).
 
 ## Later ideas
 - Additional connectors (provincial tenders, port data, supplier registries)

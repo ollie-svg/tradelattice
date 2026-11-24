@@ -35,6 +35,10 @@ See the [full quickstart](quickstart.md) for details.
 
 Results are indicative only and are not customs, legal or tax advice.
 
-## Design partners
+## Check our numbers
 
-Browes AI is onboarding five design partners through January 2027. Email [hello@tradelattice.ca](mailto:hello@tradelattice.ca).
+TradeLattice has never been checked against a real customs entry. We are asking licensed customs brokers, and importers who hold their own entries, to change that.
+
+Share twenty past entry lines with your own duty, surtax and GST totals, with importer names and transaction numbers removed. They stay private. In return we run your tariff items against CBSA's December 2026 amendment and the January 2027 renumbering, and send you every line that changes.
+
+Nothing is for sale and there is no deadline. Email [hello@tradelattice.ca](mailto:hello@tradelattice.ca).
