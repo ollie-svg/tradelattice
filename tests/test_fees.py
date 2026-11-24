@@ -151,20 +151,28 @@ def test_api_gst(client):
 
 
 def test_api_fta_unknown_both_totals_carry_gst(client):
+    # one conditional order (overwrites the fixture's s:1); qualification unknown -> both totals
     client.post("/records", json=[
-        rec("s:1", "surtax_order", {"hs_prefix": "7208", "origin_country": "US", "pct": "50",
+        rec("s:1", "surtax_order", {"hs_prefix": "72083600", "origin_country": "US", "pct": "25",
                                     "list_id": "L", "effective_from": "2026-09-08",
-                                    "effective_to": None}),
-        rec("s:ex", "surtax_order", {"hs_prefix": "72083600", "origin_country": "US", "pct": "25",
-                                     "list_id": "L", "effective_from": "2026-09-08",
-                                     "effective_to": None, "exempt_if": "fta_qualified"}),
+                                    "effective_to": None, "exempt_if": "fta_qualified"}),
     ])
     cad = {"amount": 1000, "currency": "CAD"}
     j = post(client, declared_value=cad, include_taxes=True).json()
     # not qualified: surtax 250 -> duty-paid 1250 -> GST 62.50 -> total 1312.50
-    # qualified:     surtax 500 -> duty-paid 1500 -> GST 75.00 -> total 1575.00
+    # qualified:     surtax   0 -> duty-paid 1000 -> GST 50.00 -> total 1050.00
     assert j["surtax"] == 250 and j["taxes"][0]["amount"] == 62.5 and j["total"] == 1312.5
-    assert j["surtax_if_fta_qualified"] == 500 and j["total_if_fta_qualified"] == 1575.0
+    assert j["surtax_if_fta_qualified"] == 0 and j["total_if_fta_qualified"] == 1050.0
+
+
+def test_api_two_orders_refuse_before_fees(client):
+    client.post("/records", json=[
+        rec("s:2", "surtax_order", {"hs_prefix": "7208", "origin_country": "US", "pct": "10",
+                                    "list_id": "L2", "effective_from": "2026-09-08",
+                                    "effective_to": None}),
+    ])
+    r = post(client, declared_value={"amount": 1000, "currency": "CAD"}, include_taxes=True)
+    assert r.status_code == 422 and r.json()["reason"] == "surtax_ambiguous"
 
 
 def test_evaluate_accepts_plain_numbers():

@@ -23,17 +23,36 @@ curl http://localhost:8000/tariff/0902.30.00.00
 
 Prohibited goods: before FX and tariff lookup, `prohibition` records for the request's jurisdiction, origin and date whose `hs_prefix` prefixes the HS code are matched (longest prefix wins). A match returns **409** with `{"prohibited": true, "hs_code", "origin_country", "jurisdiction", "list_id", "authority", "effective_from", "effective_to", "source_url", "message"}`. This is a correct non-2xx answer, not a fault: no landed cost is computed for goods that may not be entered.
 
-FTA tri-state: a `surtax_order` with `exempt_if: "fta_qualified"` is skipped when `fta_qualified` is `true`, applied when `false`, and when omitted or `null` both outcomes are reported. `surtax` and `total` are the not-qualified figures; `surtax_if_fta_qualified` and `total_if_fta_qualified` are the qualified ones (both `null` when `fta_qualified` is set, or no exempt order matched). Within each set only the longest-prefix order applies; stacking is not supported yet. Example: a 25% order with `exempt_if` on `72083600` and a 50% order on `7208`, on 1000 CAD, give `surtax` 250.00, `surtax_if_fta_qualified` 500.00 and the component line `FTA qualification unknown: surtax 250.00 if not qualified, 500.00 if qualified`. A chosen order whose `basis` is not `value` returns 422 `surtax basis 'non_fta_content_value' needs a content value; not supported yet`.
+FTA tri-state: a `surtax_order` with `exempt_if: "fta_qualified"` is skipped when `fta_qualified` is `true`, applied when `false`, and when omitted or `null` both outcomes are reported. `surtax` and `total` are the not-qualified figures; `surtax_if_fta_qualified` and `total_if_fta_qualified` are the qualified ones (both `null` when `fta_qualified` is set, or the applicable order is unconditional). Example: a 25% order with `exempt_if` on `72083600`, on 1000 CAD, gives `surtax` 250.00, `surtax_if_fta_qualified` 0.00 and the component line `FTA qualification unknown: surtax 250.00 if not qualified, 0.00 if qualified`.
+
+Exactly one order may apply. After the `exempt_if` filter, if more than one `surtax_order` is in force for the HS code, origin and date — a longer and a shorter prefix, two lists — the API returns 422 `surtax_ambiguous` naming the orders, because the record declares `stacking` but nothing computes it yet; refusing is the shared rule with every consumer (ADR 0005). Stacking arithmetic arrives with the US overlays. An applicable order whose `basis` is not `value` returns 422 `surtax_content_basis` (`surtax basis 'non_fta_content_value' needs a content value; not supported yet`); the rate is never applied to the full value.
 
 ## Landed cost
 
-`POST /landed-cost` returns the landed cost in CAD. In order: the declared value is converted to CAD at the Bank of Canada rate for the shipment date, duty is evaluated on that CAD value, and any origin surtax is added.
+`POST /landed-cost` returns the landed cost in CAD. The computation is a pure function, `tradelattice.api.landed.compute(request, records, jurisdiction, today)`, over the records the route loads from the database (ADR 0005); the route only loads records and maps the two refusal exceptions below to HTTP. Consumers may call `compute()` directly on their own record set, or run their own implementation against the golden cases shipped in the package (`tradelattice.golden.cases()` and the comparison rule `tradelattice.golden.check()`).
+
+### Refusals and reason codes
+
+A 409 means the goods may not be entered (`prohibited: true`, see Jurisdictions above). Every other non-2xx body is `{"detail": <message>, "reason": <code>}` with one of these stable codes:
+
+| Status | `reason` | When |
+| --- | --- | --- |
+| 404 | `tariff_not_found` | no `tariff_line` of the jurisdiction prefixes the HS code |
+| 404 | `rate_not_found` | the matched line has no rate for the treatment |
+| 422 | `invalid_request` | `hs_code`, `origin_country` or `shipment_date` is malformed |
+| 422 | `fx_missing` | no `fx_rate` into the jurisdiction's currency on or before the shipment date |
+| 422 | `rate_not_applicable` | the rate cannot be evaluated from the inputs (a specific rate with no quantity, a not-applicable treatment) |
+| 422 | `surtax_ambiguous` | more than one `surtax_order` applies after the `exempt_if` filter; `stacking` is declared, not computed |
+| 422 | `surtax_content_basis` | an applicable `surtax_order` has a `basis` other than `value`; the request carries no content value and the rate is never applied to the full value |
+| 501 | `jurisdiction_no_data` | the jurisdiction is registered but has no `tariff_line` records loaded (today: `US`) |
+
+`unknown jurisdiction 'XX'` (422) is raised by the route before any computation and carries no code. Records are scoped by their envelope `jurisdiction`: a `surtax_order` or `tariff_line` filed under another jurisdiction is ignored. In order: the declared value is converted to CAD at the Bank of Canada rate for the shipment date, duty is evaluated on that CAD value, and any origin surtax is added.
 
 Request fields: `hs_code`, `origin_country` (2 letters, case-insensitive), `declared_value` (`amount`, `currency`), optional `treatment` (default `MFN`), optional `quantity` and `unit` for specific rates, and optional `shipment_date` (ISO date, default today UTC).
 
 - **FX**: when `declared_value.currency` is not `CAD`, the latest `fx_rate` record (`currency` = declared, `to` = `CAD`) with `on` on or before `shipment_date` is used. If none exists the API returns 422 `no CAD exchange rate on or before <date> for <CUR>; load the boc_fx connector`.
 - **Duty**: ad valorem, specific or compound, on `value_cad`. Specific components are already in CAD and unaffected by currency. `quantity` and `unit` accept `kg`, `tonne`, `litre`, `dozen`, `each`, `hl`, with common aliases.
-- **Surtax**: the `surtax_order` records in force on `shipment_date` for the HS code and origin are matched (`cbsa_surtax.applicable`); the longest prefix wins and `surtax = value_cad * pct / 100`. It applies in addition to duty whatever the treatment (a CUSMA-Free line from the US still pays it).
+- **Surtax**: the `surtax_order` records in force on `shipment_date` for the HS code and origin are matched (`cbsa_surtax.applicable`); exactly one may apply (see Jurisdictions) and `surtax = value_cad * pct / 100`. It applies in addition to duty whatever the treatment (a CUSMA-Free line from the US still pays it).
 - Money is rounded to 2 dp at the end only. `total = value_cad + duty + surtax + fees + taxes`; `duty_rate` is `duty / value_cad * 100`.
 
 ```

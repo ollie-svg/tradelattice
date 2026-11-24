@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import os
-import re
 from contextlib import asynccontextmanager
-from datetime import UTC, date, datetime
-from decimal import ROUND_HALF_UP, Decimal
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -15,14 +13,10 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import String, cast, func, select
 from sqlalchemy.orm import Session
 
-from tradelattice.connectors.cbsa_surtax import applicable
-
-from . import fees as feemod
 from . import jurisdictions
 from .db import get_session, init_db
-from .duty import DutyInputError, NotApplicable, basis, evaluate, parse_duty
+from .landed import NotComputable, Prohibited, RecordSet, best_tariff, compute, normalize_hs
 from .models import Record
-from .overlays import prohibited
 from .schemas import LandedCostIn, LandedCostOut, RecordOut, UpsertResult
 from .store import upsert_records
 from .validation import validate_records
@@ -99,190 +93,42 @@ def get_record(record_id: str, session: Db) -> dict:
     return row.to_dict()
 
 
-def _normalize_hs(code: str) -> str:
-    digits = code.replace(".", "").replace(" ", "")
-    if not re.fullmatch(r"[0-9]{2,10}", digits):
-        raise HTTPException(422, "hs_code must be 2-10 digits")
-    return digits
+def _records(session: Session, type_: str) -> list[dict]:
+    return [r.to_dict() for r in session.scalars(select(Record).where(Record.type == type_))]
 
 
-def _best_tariff(session: Session, hs: str) -> Record:
-    rows = session.scalars(select(Record).where(Record.type == "tariff_line")).all()
-    best: Record | None = None
-    for r in rows:
-        code = str(r.attributes.get("hs_code", ""))
-        if not code or not hs.startswith(code):
-            continue
-        if best is None:
-            best = r
-            continue
-        bcode = str(best.attributes["hs_code"])
-        if len(code) > len(bcode) or (
-            len(code) == len(bcode) and r.observed_at > best.observed_at
-        ):
-            best = r
-    if best is None:
-        raise HTTPException(404, f"no tariff line matches {hs}")
-    return best
+def _not_computable(e: NotComputable) -> JSONResponse:
+    return JSONResponse(status_code=e.status, content={"detail": e.detail, "reason": e.reason})
 
 
 @app.get("/tariff/{hs_code}", response_model=RecordOut)
-def get_tariff(hs_code: str, session: Db) -> dict:
-    return _best_tariff(session, _normalize_hs(hs_code)).to_dict()
-
-
-def _fx_for(session: Session, currency: str, on: str) -> tuple[str, str]:
-    """Return (rate string, rate date) for the latest fx_rate to CAD on or before `on`."""
-    best: dict | None = None
-    for r in session.scalars(select(Record).where(Record.type == "fx_rate")):
-        a = r.attributes
-        if a.get("currency") != currency or a.get("to") != "CAD" or str(a.get("on", "9999")) > on:
-            continue
-        if best is None or a["on"] > best["on"]:
-            best = a
-    if best is None:
-        raise HTTPException(
-            422,
-            f"no CAD exchange rate on or before {on} for {currency}; load the boc_fx connector",
-        )
-    return str(best["rate"]), str(best["on"])
+def get_tariff(hs_code: str, session: Db) -> dict | JSONResponse:
+    try:
+        return best_tariff(_records(session, "tariff_line"), normalize_hs(hs_code))
+    except NotComputable as e:
+        return _not_computable(e)
 
 
 @app.post("/landed-cost", response_model=LandedCostOut)
 def landed_cost(body: LandedCostIn, session: Db) -> LandedCostOut | JSONResponse:
+    """Thin wrapper: load records, call the pure `compute()`, map its exceptions (ADR 0005)."""
     jcode = body.jurisdiction.strip().upper()
     try:
         jur = jurisdictions.get(jcode)
     except KeyError as e:
         raise HTTPException(422, f"unknown jurisdiction {jcode!r}") from e
-    if jcode == "US":
-        raise HTTPException(501, "US profile has no data loaded yet; see the roadmap")
-    hs = _normalize_hs(body.hs_code)
-    origin = body.origin_country.strip().upper()
-    if not re.fullmatch(r"[A-Z]{2}", origin):
-        raise HTTPException(422, "origin_country must be a 2-letter country code")
-    if body.shipment_date is None:
-        ship = datetime.now(UTC).date().isoformat()
-    else:
-        try:
-            ship = date.fromisoformat(body.shipment_date).isoformat()
-        except ValueError as e:
-            raise HTTPException(422, "shipment_date must be an ISO date (YYYY-MM-DD)") from e
-    bans = [r.to_dict() for r in session.scalars(select(Record).where(Record.type == "prohibition"))]
-    ban = prohibited(bans, hs, origin, ship, jcode)
-    if ban is not None:
-        return JSONResponse(status_code=409, content=ban)
-    line = _best_tariff(session, hs)
-    treatment = body.treatment or "MFN"
-    rate_str = next(
-        (r["rate"] for r in line.attributes.get("rates", []) if r.get("treatment") == treatment),
-        None,
+    records = RecordSet(
+        tariff_lines=_records(session, "tariff_line"),
+        fx_rates=_records(session, "fx_rate"),
+        surtax_orders=_records(session, "surtax_order"),
+        prohibitions=_records(session, "prohibition"),
     )
-    if rate_str is None:
-        raise HTTPException(404, f"no rate for treatment {treatment!r} on {line.attributes['hs_code']}")
-    amount = body.declared_value.amount
-    cur = body.declared_value.currency.strip().upper()
-    fx_rate: str | None = None
-    fx_on: str | None = None
-    fx_lines: list[str] = []
-    if cur == "CAD":
-        value_cad = amount
-    else:
-        fx_rate, fx_on = _fx_for(session, cur, ship)
-        value_cad = amount * float(fx_rate)
-        fx_lines.append(
-            f"FX {cur}→CAD at {fx_rate} (BoC {fx_on}): {amount:,.2f} {cur} = {value_cad:,.2f} CAD"
-        )
     try:
-        node = parse_duty(rate_str)
-        if isinstance(node, NotApplicable):
-            raise DutyInputError("rate not applicable for this treatment")
-        raw_duty, components = evaluate(node, value_cad, body.quantity, body.unit)
-    except DutyInputError as e:
-        raise HTTPException(422, str(e)) from e
-    surtax_pct: str | None = None
-    surtax_list: str | None = None
-    raw_surtax = 0.0
-    sur_lines: list[str] = []
-    orders = [r.to_dict() for r in session.scalars(select(Record).where(Record.type == "surtax_order"))]
-    hits = applicable(orders, hs, origin, ship)
-    non_exempt = [h for h in hits if h.get("exempt_if") != "fta_qualified"]
-    fta = body.fta_qualified
-    hit = (non_exempt[0] if non_exempt else None) if fta is True else (hits[0] if hits else None)
-    alt = non_exempt[0] if non_exempt else None  # chosen order if the goods qualify (fta unknown)
-    raw_alt: float | None = None
-    for h in (hit, alt if fta is None else None):
-        if h is not None and h.get("basis", "value") != "value":
-            raise HTTPException(
-                422, f"surtax basis {h['basis']!r} needs a content value; not supported yet")
-    if hit:
-        surtax_pct = str(hit["pct"])
-        surtax_list = hit["list_id"]
-        raw_surtax = value_cad * float(surtax_pct) / 100
-        sur_lines.append(
-            f"surtax {float(surtax_pct):g}% of {value_cad:,.2f} ({surtax_list}, origin {origin}) "
-            f"= {raw_surtax:,.2f}"
-        )
-    if fta is None and any(h.get("exempt_if") == "fta_qualified" for h in hits):
-        raw_alt = value_cad * float(alt["pct"]) / 100 if alt else 0.0
-        sur_lines.append(
-            f"FTA qualification unknown: surtax {round(raw_surtax, 2):.2f} if not qualified, "
-            f"{round(raw_alt, 2):.2f} if qualified"
-        )
-    duty = round(raw_duty, 2)
-    surtax = round(raw_surtax, 2)
-    vcad = round(value_cad, 2)
-    pct = round(duty / value_cad * 100, 2) if value_cad else 0.0
-
-    def dec(x: float) -> Decimal:
-        return Decimal(repr(round(x, 6)))  # strip float noise before Decimal arithmetic
-
-    def cascade(sur: float) -> tuple[list[feemod.Line], list[feemod.Line], float]:
-        ctx = {"value": dec(value_cad), "duty": dec(raw_duty), "surtax": dec(sur)}
-        fl, tl = feemod.run(jur.fee_schedule, ctx, ship, body.mode, body.include_taxes)
-        grand = dec(value_cad + raw_duty + sur) + sum((x.amount for x in fl + tl), Decimal(0))
-        return fl, tl, grand
-
-    fee_lines, tax_lines, grand = cascade(raw_surtax)
-    if fee_lines or tax_lines:
-        total = float(grand.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
-    else:
-        total = round(value_cad + raw_duty + raw_surtax, 2)
-    total_alt: float | None = None
-    if raw_alt is not None:
-        fa, ta, grand_alt = cascade(raw_alt)
-        if fa or ta:
-            total_alt = float(grand_alt.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
-        else:
-            total_alt = round(value_cad + raw_duty + raw_alt, 2)
-    fee_components = [feemod.describe(x) for x in fee_lines + tax_lines]
-    return LandedCostOut(
-        hs_code=hs,
-        matched_hs_code=str(line.attributes["hs_code"]),
-        treatment=treatment,
-        duty_rate=pct,
-        duty=duty,
-        total=total,
-        currency="CAD",
-        declared_currency=cur,
-        value_cad=vcad,
-        fx_rate=fx_rate,
-        fx_on=fx_on,
-        surtax_pct=surtax_pct,
-        surtax=surtax,
-        surtax_list_id=surtax_list,
-        shipment_date=ship,
-        rate=rate_str,
-        components=fx_lines + components + sur_lines + fee_components,
-        basis=basis(node),
-        jurisdiction=jcode,
-        fta_qualified=fta,
-        surtax_if_fta_qualified=None if raw_alt is None else round(raw_alt, 2),
-        total_if_fta_qualified=total_alt,
-        fees=[feemod.to_dict(x) for x in fee_lines],
-        taxes=[feemod.to_dict(x) for x in tax_lines],
-        include_taxes=body.include_taxes,
-    )
+        return compute(body, records, jur, datetime.now(UTC).date())
+    except Prohibited as e:
+        return JSONResponse(status_code=409, content=e.payload)
+    except NotComputable as e:
+        return _not_computable(e)
 
 
 if WEB_DIR is not None and (WEB_DIR / "index.html").is_file():

@@ -28,7 +28,7 @@
             },
             "edition": {"type": "string", "pattern": "^T\\d{4}(-\\d+)?$", "description": "Tariff edition, e.g. T2026-2."},
             "effective_from": {"type": "string", "format": "date"},
-            "effective_to": {"type": ["string", "null"], "format": "date"}
+            "effective_to": {"type": ["string", "null"], "format": "date", "description": "Exclusive: a measure with effective_to = D is not in force on D. Null means open-ended. A source that states an inclusive end date is normalised by its connector to the day after."}
           }
         }
       }

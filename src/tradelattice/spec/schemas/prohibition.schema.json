@@ -17,7 +17,7 @@
             "origin_country": {"type": "string", "pattern": "^[A-Z]{2}$"},
             "list_id": {"type": "string", "minLength": 1},
             "effective_from": {"type": "string", "format": "date"},
-            "effective_to": {"type": ["string", "null"], "format": "date", "description": "Null when open-ended. When a string, must not be before effective_from (semantic rule)."},
+            "effective_to": {"type": ["string", "null"], "format": "date", "description": "Exclusive: a measure with effective_to = D is not in force on D. Null means open-ended. A source that states an inclusive end date is normalised by its connector to the day after. When a string, must not be before effective_from (semantic rule)."},
             "authority": {"type": "string"},
             "source_url": {"type": "string", "format": "uri"}
           }
