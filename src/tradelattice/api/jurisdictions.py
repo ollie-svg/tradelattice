@@ -15,6 +15,9 @@ class Jurisdiction:
     overlay_source: str
     tariff_source: str
     fee_schedule: list[FeeRule] = field(default_factory=list)
+    # Components a complete landed cost in this jurisdiction would include and this profile does not
+    # model. Named in every result's `not_computed` so a reader knows what the total leaves out.
+    not_modelled: tuple[str, ...] = ()
 
 
 CA_FEES: list[FeeRule] = [
@@ -35,8 +38,22 @@ US_FEES: list[FeeRule] = [
 ]
 
 JURISDICTIONS: dict[str, Jurisdiction] = {
-    "CA": Jurisdiction("CA", "CAD", "latest_on_or_before", "boc", "cbsa_surtax", "cbsa_tariff", CA_FEES),
-    "US": Jurisdiction("US", "USD", "quarterly_certified", "treasury", "us_overlays", "usitc_hts", US_FEES),
+    "CA": Jurisdiction("CA", "CAD", "latest_on_or_before", "boc", "cbsa_surtax", "cbsa_tariff", CA_FEES,
+        not_modelled=(
+            "surtax_remission",      # Finance Canada remission orders and exclusions are not applied
+            "add_cvd",               # anti-dumping and countervailing duties (SIMA)
+            "excise",                # excise duty and excise tax
+            "pst_hst_provincial",    # provincial sales tax / the provincial part of HST (a tenant fact)
+            "valuation_adjustments", # assists, royalties, transport to the place of direct shipment
+            "drawback",              # duty drawback and relief programs
+            "origin_determination",  # treatment and FTA qualification are inputs, never inferred
+        ),
+    ),
+    "US": Jurisdiction("US", "USD", "quarterly_certified", "treasury", "us_overlays", "usitc_hts", US_FEES,
+        not_modelled=(
+            "add_cvd", "excise", "valuation_adjustments", "drawback", "origin_determination",
+        ),
+    ),
 }
 
 

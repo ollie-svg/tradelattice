@@ -137,6 +137,14 @@ def compute(
             raise NotComputable(
                 422, "invalid_request", "shipment_date must be an ISO date (YYYY-MM-DD)"
             ) from e
+    not_computed: list[str] = list(jurisdiction.not_modelled)
+    missing: list[str] = []
+    flag_lines: list[str] = []
+    if not any(r.get("jurisdiction") == jcode for r in records.prohibitions):
+        # No prohibition records loaded for this jurisdiction: the goods were not checked against any
+        # ban. Named, not withheld: no prohibition connector exists yet, so this is the normal state.
+        not_computed.append("prohibition_check")
+        flag_lines.append(f"prohibitions not checked: no prohibition records loaded for {jcode}")
     ban = prohibited(records.prohibitions, hs, origin, ship, jcode)
     if ban is not None:
         raise Prohibited(ban)
@@ -178,6 +186,13 @@ def compute(
     raw_surtax = 0.0
     sur_lines: list[str] = []
     orders = [r for r in records.surtax_orders if r.get("jurisdiction") == jcode]
+    if not orders:
+        # Surtax is in scope for every landed cost here and the connector ships a sample. With no
+        # surtax_order records loaded the result cannot say whether a surtax applies, so the total is
+        # withheld rather than returned with a silent zero.
+        not_computed.append("surtax")
+        missing.append("surtax")
+        flag_lines.append(f"surtax not computed: no surtax_order records loaded for {jcode}; total withheld")
     hits = applicable(orders, hs, origin, ship)
     fta = request.fta_qualified
     if fta is True:
@@ -225,6 +240,10 @@ def compute(
         return fl, tl, grand
 
     fee_lines, tax_lines, grand = cascade(raw_surtax)
+    if not request.include_taxes and any(r.category == "tax" for r in jurisdiction.fee_schedule):
+        # Taxes exist for this jurisdiction and were not asked for: named, so the total is read correctly.
+        not_computed.extend(sorted({r.name.lower() for r in jurisdiction.fee_schedule if r.category == "tax"}))
+    total: float | None
     if fee_lines or tax_lines:
         total = float(grand.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
     else:
@@ -236,6 +255,9 @@ def compute(
             total_alt = float(grand_alt.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
         else:
             total_alt = round(value + raw_duty + raw_alt, 2)
+    if missing:
+        total = None
+        total_alt = None
     fee_components = [feemod.describe(x) for x in fee_lines + tax_lines]
     return LandedCostOut(
         hs_code=hs,
@@ -254,7 +276,7 @@ def compute(
         surtax_list_id=surtax_list,
         shipment_date=ship,
         rate=rate_str,
-        components=fx_lines + components + sur_lines + fee_components,
+        components=fx_lines + components + sur_lines + fee_components + flag_lines,
         basis=basis(node),
         jurisdiction=jcode,
         fta_qualified=fta,
@@ -263,4 +285,6 @@ def compute(
         fees=[feemod.to_dict(x) for x in fee_lines],
         taxes=[feemod.to_dict(x) for x in tax_lines],
         include_taxes=request.include_taxes,
+        not_computed=not_computed,
+        missing=missing,
     )

@@ -90,3 +90,71 @@ def test_check_rule():
         check({"reason": "a"}, {"reason": "b"})
     with pytest.raises(AssertionError):
         check({"x": [1, 2]}, {"x": [1]})
+
+
+# ---- result contract: named flags, withheld total (v0.3.2) --------------------------------------
+
+def _steel_case():
+    from tradelattice.golden import cases
+    return next(c for c in cases() if c["name"] == "steel-us-cusma-10000usd")
+
+
+def test_flags_are_always_present_and_named():
+    from tradelattice.api import jurisdictions
+    from tradelattice.api.landed import RecordSet, compute
+    from tradelattice.api.schemas import LandedCostIn
+    c = _steel_case()
+    out = compute(LandedCostIn(**c["request"]), RecordSet(**c["records"]), jurisdictions.get("CA"), date.fromisoformat(c["today"]))
+    assert out.not_computed[:7] == list(jurisdictions.get("CA").not_modelled)
+    assert "prohibition_check" in out.not_computed  # no prohibition records in this case
+    assert "gst" in out.not_computed  # include_taxes defaults to false
+    assert "surtax" not in out.not_computed and out.missing == [] and out.total is not None
+
+
+def test_no_surtax_records_withholds_total_but_returns_duty():
+    from tradelattice.api import jurisdictions
+    from tradelattice.api.landed import RecordSet, compute
+    from tradelattice.api.schemas import LandedCostIn
+    c = _steel_case()
+    rs = RecordSet(tariff_lines=c["records"]["tariff_lines"], fx_rates=c["records"]["fx_rates"])
+    out = compute(LandedCostIn(**c["request"]), rs, jurisdictions.get("CA"), date.fromisoformat(c["today"]))
+    assert out.total is None and out.total_if_fta_qualified is None
+    assert out.missing == ["surtax"] and "surtax" in out.not_computed
+    assert out.value_cad > 0 and out.surtax == 0.0 and out.surtax_list_id is None  # UST steel is Free: duty 0.0
+    assert any("total withheld" in line for line in out.components)
+
+
+def test_prohibition_records_loaded_clears_the_flag():
+    from tradelattice.api import jurisdictions
+    from tradelattice.api.landed import RecordSet, compute
+    from tradelattice.api.schemas import LandedCostIn
+    c = _steel_case()
+    ban = {"id": "t:ban", "type": "prohibition", "source": "t", "observed_at": "2026-01-01T00:00:00Z", "jurisdiction": "CA",
+           "attributes": {"hs_prefix": "0101", "origin_country": "ZZ", "list_id": "irrelevant", "authority": "test",
+                          "effective_from": "2026-01-01", "effective_to": None}}
+    rs = RecordSet(**{**c["records"], "prohibitions": [ban]})
+    out = compute(LandedCostIn(**c["request"]), rs, jurisdictions.get("CA"), date.fromisoformat(c["today"]))
+    assert "prohibition_check" not in out.not_computed
+
+
+def test_taxes_requested_clears_the_gst_flag():
+    from tradelattice.api import jurisdictions
+    from tradelattice.api.landed import RecordSet, compute
+    from tradelattice.api.schemas import LandedCostIn
+    c = _steel_case()
+    out = compute(LandedCostIn(**{**c["request"], "include_taxes": True}), RecordSet(**c["records"]), jurisdictions.get("CA"), date.fromisoformat(c["today"]))
+    assert "gst" not in out.not_computed and any(t.name == "GST" for t in out.taxes)
+
+
+def test_missing_is_a_subset_of_not_computed_for_every_golden_case():
+    from tradelattice.api import jurisdictions
+    from tradelattice.api.landed import NotComputable, Prohibited, RecordSet, compute
+    from tradelattice.api.schemas import LandedCostIn
+    from tradelattice.golden import cases
+    for c in cases():
+        try:
+            out = compute(LandedCostIn(**c["request"]), RecordSet(**c["records"]), jurisdictions.get(c["jurisdiction"]), date.fromisoformat(c["today"]))
+        except (NotComputable, Prohibited):
+            continue
+        assert set(out.missing) <= set(out.not_computed), c["name"]
+        assert (out.total is None) == bool(out.missing), c["name"]

@@ -64,6 +64,6 @@ Spec changes are proposed as issues before PRs; see [CONTRIBUTING.md](CONTRIBUTI
 
 ## Status and limits
 
-Pre-1.0. Results are indicative and are not customs, legal or tax advice. Not modelled yet: surtax remission orders and exclusions, PST/HST, tariff-rate quotas, and the US jurisdiction (registered, returns 501 until its data is loaded). Python 3.11+.
+Pre-1.0. Results are indicative and are not customs, legal or tax advice. Every landed-cost result names what it does not include (`not_computed`: surtax remission orders and exclusions, anti-dumping and countervailing duties, excise, PST/HST, valuation adjustments, drawback, origin determination; plus anything not checked in this instance) and withholds the total rather than returning a sum with a silent zero when an in-scope component is unavailable (`missing`). Tariff-rate quota rates are refused, not flagged. The US jurisdiction is registered and returns 501 until its data is loaded. Python 3.11+.
 
 Maintained by [Browes AI](https://browes.ai). Licensed under Apache-2.0.

@@ -64,7 +64,8 @@ def test_a_ca_default_unchanged(client):
     assert j["surtax"] == 699.70 and j["total"] == 2099.10 and j["value_cad"] == 1399.40
     assert j["jurisdiction"] == "CA" and j["fta_qualified"] is None
     assert j["surtax_if_fta_qualified"] is None and j["total_if_fta_qualified"] is None
-    assert len(j["components"]) == 3
+    assert len([c for c in j["components"] if not c.startswith("prohibitions not checked")]) == 3
+    assert j["not_computed"][-2:] == ["prohibition_check", "gst"] and j["missing"] == [] and j["total"] is not None
 
 
 def test_b_us_501(client):

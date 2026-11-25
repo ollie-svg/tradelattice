@@ -115,10 +115,12 @@ $('cost-form').addEventListener('submit', (ev) => {
       <dt>Surtax</dt><dd>${surLine ? esc(surLine) : 'none'}</dd>
       ${(r.fees || []).map((f) => `<dt>${esc(f.name)}</dt><dd>${money({ amount: f.amount, currency: 'CAD' })}</dd>`).join('')}
       ${(r.taxes || []).map((f) => `<dt>${esc(f.name)}</dt><dd>${money({ amount: f.amount, currency: 'CAD' })}</dd>`).join('')}
-      <dt>Total</dt><dd><strong>${money({ amount: r.total, currency: 'CAD' })}</strong></dd>
+      <dt>Total</dt><dd>${r.total == null
+        ? `<strong class="withheld">withheld</strong> — ${esc((r.missing || []).join(', '))} not available in this instance`
+        : `<strong>${money({ amount: r.total, currency: 'CAD' })}</strong>`}</dd>
       ${r.total_if_fta_qualified != null ? `<dt>Total if FTA qualified</dt><dd><strong>${money({ amount: r.total_if_fta_qualified, currency: 'CAD' })}</strong> (surtax ${esc(r.surtax_if_fta_qualified)})</dd>` : ''}</dl>
       ${comps.length ? '<ul class="muted">' + comps.map((c) => `<li>${esc(c)}</li>`).join('') + '</ul>' : ''}
-      <p class="muted">${r.include_taxes ? 'PST/HST are not included.' : 'GST/PST are not included.'} Surtax remissions and exclusions are not modelled.</p>`;
+      <p class="muted">Not computed: ${esc((r.not_computed || []).join(', ') || 'nothing')}.</p>`;
   });
 });
 

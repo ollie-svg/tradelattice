@@ -55,6 +55,15 @@ Request fields: `hs_code`, `origin_country` (2 letters, case-insensitive), `decl
 - **Surtax**: the `surtax_order` records in force on `shipment_date` for the HS code and origin are matched (`cbsa_surtax.applicable`); exactly one may apply (see Jurisdictions) and `surtax = value_cad * pct / 100`. It applies in addition to duty whatever the treatment (a CUSMA-Free line from the US still pays it).
 - Money is rounded to 2 dp at the end only. `total = value_cad + duty + surtax + fees + taxes`; `duty_rate` is `duty / value_cad * 100`.
 
+### What the result does not include: `not_computed` and `missing`
+
+Every 200 body carries two always-present lists, so the reader of a number knows what it leaves out without opening the code.
+
+- **`not_computed`** names every component a complete landed cost would include and this result does not. First the jurisdiction's `not_modelled` set, in profile order — for Canada: `surtax_remission` (Finance Canada remission orders and exclusions are not applied), `add_cvd` (anti-dumping and countervailing duties), `excise`, `pst_hst_provincial` (a tenant fact: depends on the importer's province and registration), `valuation_adjustments` (assists, royalties, transport to the place of direct shipment), `drawback`, `origin_determination` (treatment and FTA qualification are inputs, never inferred). Then anything not computed for this request: `prohibition_check` when the instance holds no `prohibition` records for the jurisdiction (the goods were not checked against any ban), `surtax` when it holds no `surtax_order` records, and the tax names (`gst`) when `include_taxes` is false.
+- **`missing`** is the subset of `not_computed` that is in scope for the jurisdiction and unavailable in this instance. Today that is `surtax` with no `surtax_order` records loaded. **When `missing` is non-empty, `total` and `total_if_fta_qualified` are `null`.** The result never returns a sum that silently treats a missing component as zero; `duty`, `value_cad`, `fees` and `taxes` are still returned. `components` carries a matching line (`surtax not computed: no surtax_order records loaded for CA; total withheld`).
+
+Refusals are different from flags: a component that cannot be computed for *these goods* (a tariff-rate quota rate, a content-basis surtax, two overlapping orders) is a 4xx with a `reason` code, not a flag, because no number for the line is honest. A flag means the number is honest for what it includes.
+
 ```
 curl -X POST http://localhost:8000/landed-cost \
   -H 'Content-Type: application/json' \

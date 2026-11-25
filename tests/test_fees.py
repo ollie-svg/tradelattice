@@ -137,7 +137,8 @@ def post(client, **over):
 def test_api_default_no_fees(client):
     j = post(client).json()
     assert j["fees"] == [] and j["taxes"] == [] and j["include_taxes"] is False
-    assert j["total"] == 2099.10 and len(j["components"]) == 3
+    assert j["total"] == 2099.10 and len([c for c in j["components"] if not c.startswith("prohibitions not checked")]) == 3
+    assert "gst" in j["not_computed"]  # taxes not asked for: named
 
 
 def test_api_gst(client):
@@ -147,7 +148,8 @@ def test_api_gst(client):
     assert j["taxes"] == [{"name": "GST", "authority": "ETA s.212", "base": "duty_paid_value",
                            "base_amount": 2099.10, "amount": 104.96}]
     assert j["total"] == 2204.06  # 2099.10 + 104.96
-    assert j["components"][-1] == "GST 5% of duty-paid value 2,099.10 = 104.96"
+    assert "GST 5% of duty-paid value 2,099.10 = 104.96" in j["components"]
+    assert "gst" not in j["not_computed"]
 
 
 def test_api_fta_unknown_both_totals_carry_gst(client):

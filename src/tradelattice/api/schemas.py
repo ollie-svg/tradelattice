@@ -53,7 +53,7 @@ class LandedCostOut(BaseModel):
     treatment: str
     duty_rate: float
     duty: float
-    total: float
+    total: float | None  # None when `missing` is non-empty: an in-scope component could not be computed
     currency: str
     declared_currency: str
     value_cad: float
@@ -73,3 +73,11 @@ class LandedCostOut(BaseModel):
     fees: list[FeeLine] = []
     taxes: list[FeeLine] = []
     include_taxes: bool = False
+    # Named components a complete landed cost would include and this result does not: the jurisdiction's
+    # `not_modelled` set, plus anything not computed for this request (`gst` when taxes were not asked for,
+    # `prohibition_check` when no prohibition records are loaded, `surtax` when no surtax orders are loaded).
+    not_computed: list[str] = []
+    # The subset of `not_computed` that is in scope for this jurisdiction and unavailable in this instance.
+    # When non-empty, `total` and `total_if_fta_qualified` are withheld (null), never a number that silently
+    # leaves the component out.
+    missing: list[str] = []

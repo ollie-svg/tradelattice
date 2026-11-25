@@ -1,5 +1,9 @@
 # Release notes
 
+## Unreleased
+
+- **Result contract:** every `/landed-cost` 200 body now carries `not_computed` (named components a complete landed cost would include and this result does not: the jurisdiction's `not_modelled` set, then `prohibition_check`, `surtax` or `gst` when not checked or not asked for) and `missing` (the in-scope subset unavailable in this instance). **When `missing` is non-empty, `total` and `total_if_fta_qualified` are `null`** — a result never returns a sum that silently treats a missing component as zero. Today the only withholding case is an instance with no `surtax_order` records loaded. `total` is therefore nullable in the schema; `components` gains a line per flag. `Jurisdiction` gains `not_modelled`. Golden cases carry the fields; one new case freezes the withholding. The web UI shows "withheld" and the named list in place of the fixed footer sentence. (`docs/api.md`, "What the result does not include".)
+
 ## v0.3.1 (2026-11-24)
 
 First tagged release after v0.3. The alignment branch `v0.3.1/a-compute` is merged with history (never squashed, per ADR 0005). Fee schedules as records (`fee_rule`) are deferred to v0.3.2.

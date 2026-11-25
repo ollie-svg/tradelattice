@@ -23,3 +23,12 @@ in-repo runner. The file ships as package data, so a `pip install` from a pinned
 
 Add a case whenever a verified number or a refusal is worth freezing. Never edit an expected
 value to make a test pass without a release-note line saying which number changed and why.
+
+## `not_computed` and `missing` (v0.3.2)
+
+Every 200 body carries `not_computed`: named components a complete landed cost would include and this
+result does not — the jurisdiction's `not_modelled` set in profile order, then `prohibition_check` when no
+prohibition records are loaded, `surtax` when no surtax orders are loaded, and the tax names (`gst`) when
+`include_taxes` is false. `missing` is the subset that is in scope and unavailable in this instance; when it
+is non-empty, `total` and `total_if_fta_qualified` are `null`. Lists are compared element by element, in
+order, by `check()`.

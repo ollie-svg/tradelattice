@@ -116,10 +116,20 @@ def landed(client, **over):
     return client.post("/landed-cost", json=body)
 
 
+NOOP_SURTAX = {
+    "id": "s:noop", "type": "surtax_order", "source": "t", "observed_at": "2026-01-01T00:00:00Z",
+    "jurisdiction": "CA",
+    "attributes": {"hs_prefix": "0101", "origin_country": "ZZ", "pct": "1", "list_id": "noop",
+                   "effective_from": "2026-01-01", "effective_to": None},
+}
+"""Loaded where a test asserts a total: with no surtax_order records the total is withheld (v0.3.2)."""
+
+
 def test_landed_cost(client):
     client.post(
         "/records",
         json=[
+            NOOP_SURTAX,
             tariff("090200", [{"treatment": "MFN", "rate": "5%"}]),
             tariff(
                 "090230",
@@ -152,12 +162,20 @@ def test_landed_cost(client):
         "surtax": 0.0,
         "surtax_list_id": None,
         "rate": "6.5%",
-        "components": ["6.5% ad valorem = 13.00"],
+        "components": [
+            "6.5% ad valorem = 13.00",
+            "prohibitions not checked: no prohibition records loaded for CA",
+        ],
         "basis": "ad_valorem",
         "jurisdiction": "CA",
         "fta_qualified": None,
         "surtax_if_fta_qualified": None,
         "total_if_fta_qualified": None,
+        "not_computed": [
+            "surtax_remission", "add_cvd", "excise", "pst_hst_provincial", "valuation_adjustments",
+            "drawback", "origin_determination", "prohibition_check", "gst",
+        ],
+        "missing": [],
         "fees": [],
         "taxes": [],
         "include_taxes": False,
@@ -171,7 +189,7 @@ def test_landed_cost(client):
     # 1.20 * 10 kg = 12.00; effective 12/200*100 = 6.0
     assert ok.json()["duty"] == 12.0 and ok.json()["basis"] == "specific"
     assert ok.json()["duty_rate"] == 6.0
-    assert ok.json()["components"] == ["$1.20/kg × 10 kg = 12.00"]
+    assert ok.json()["components"][0] == "$1.20/kg × 10 kg = 12.00"
     bad = landed(client, treatment="SPEC", quantity=10, unit="litre")
     assert bad.status_code == 422
     assert landed(client, treatment="NOPE").status_code == 404
@@ -199,6 +217,7 @@ def test_landed_cost_compound_and_na(client):
     client.post(
         "/records",
         json=[
+            NOOP_SURTAX,
             tariff(
                 "090230",
                 [
@@ -214,11 +233,12 @@ def test_landed_cost_compound_and_na(client):
     # 5% = 50; floor 0.0474*2000 = 94.80; cap 0.0948*2000 = 189.60 -> 94.80; 94.8/1000*100 = 9.48
     assert j["duty"] == 94.8 and j["duty_rate"] == 9.48 and j["basis"] == "compound"
     assert j["rate"].startswith("5% but")
-    assert j["components"] == [
+    assert j["components"][:3] == [
         "5% ad valorem = 50.00",
         "floor 4.74¢/kg × 2000 kg = 94.80",
         "cap 9.48¢/kg × 2000 kg = 189.60",
     ]
+    assert j["components"][3:] == ["prohibitions not checked: no prohibition records loaded for CA"]
     assert landed(client).status_code == 422
     na = landed(client, treatment="NA")
     assert na.status_code == 422 and na.json()["detail"] == "rate not applicable for this treatment"
